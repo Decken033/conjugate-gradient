@@ -55,7 +55,15 @@ target_link_libraries(cg_openmp_ops PUBLIC
     cg_common
     OpenMP::OpenMP_CXX
 )
+# CPU OpenMP Conjugate Gradient solver.
+# Reuses parallel SpMV, dot products and vector operations.
+add_library(cg_openmp STATIC
+    src/openmp/cg_openmp.cpp
+)
 
+target_link_libraries(cg_openmp PUBLIC
+    cg_openmp_ops
+)
 # Shared 2D/3D Poisson matrix generators.
 # Reusable by serial, OpenMP, MPI and hybrid solvers.
 add_library(cg_poisson STATIC
@@ -116,11 +124,25 @@ if(BUILD_TESTING)
         cg_openmp_ops
         cg_ops
     )
-
     add_test(
         NAME openmp_spmv
         COMMAND test_openmp_ops
     )
+
+    # Complete OpenMP CG correctness tests.
+    # Compare OpenMP CG against the serial reference solver
+    # on known SPD and manufactured 2D/3D Poisson problems.
+    add_executable(test_openmp_cg
+        tests/test_openmp_cg.cpp
+    )
+
+    target_link_libraries(test_openmp_cg PRIVATE
+        cg_openmp
+        cg_serial
+        cg_ops
+        cg_poisson
+    )
+    add_test(NAME openmp_cg COMMAND test_openmp_cg)
     # Serial CG solver correctness tests.
     add_executable(test_serial_cg tests/test_serial_cg.cpp)
     target_link_libraries(test_serial_cg PRIVATE cg_serial cg_poisson)

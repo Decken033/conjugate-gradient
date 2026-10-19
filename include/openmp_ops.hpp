@@ -41,4 +41,49 @@ std::vector<double> csr_matvec_openmp(
     const OpenMPOptions& options = {}
 );
 
+ // Compute the dot product a^T*b using an OpenMP reduction.
+ //
+ // Requires a.size() == b.size().
+ // Floating-point reduction order may differ from serial,
+ // producing small numerical differences.
+ double dot_openmp(
+     const std::vector<double>& a,
+     const std::vector<double>& b,
+     const OpenMPOptions& options = {}
+ );
+
+//
+// Parallel CG vector operations.
+// Each thread updates independent vector elements.
+//
+
+// Update the solution and residual:
+// x[i] = x[i] + alpha * p[i]
+// r[i] = r[i] - alpha * Ap[i]
+void update_solution_residual_openmp(
+    std::vector<double>& x,
+    std::vector<double>& r,
+    const std::vector<double>& p,
+    const std::vector<double>& Ap,
+    double alpha,
+    const OpenMPOptions& options = {}
+);
+
+// Update the search direction:
+// p[i] = r[i] + beta * p[i]
+void update_direction_openmp(
+    std::vector<double>& p,
+    const std::vector<double>& r,
+    double beta,
+    const OpenMPOptions& options = {}
+);
+
+// Compute the true residual:
+// residual[i] = b[i] - Ax[i]
+std::vector<double> subtract_openmp(
+    const std::vector<double>& b,
+    const std::vector<double>& Ax,
+    const OpenMPOptions& options = {}
+);
+
 } // namespace cg
