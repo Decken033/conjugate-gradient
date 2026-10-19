@@ -1,0 +1,48 @@
+
+# CMake generated files and build directories
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CTestTestfile.cmake
+Testing/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# Compiled binaries and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+*.out
+
+# Editor and operating system files
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python temporary files
+__pycache__/
+*.pyc
+.venv/
+
+# HPC logs
+*.o[0-9]*
+*.e[0-9]*
+core
+core.*
+
+# Generated benchmark data
+results/*
+!results/.gitkeep
+
+# Downloaded or generated matrices
+data/*
+!data/.gitkeep
