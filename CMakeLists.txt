@@ -19,6 +19,8 @@ target_include_directories(cg_common INTERFACE
 )
 
 target_compile_features(cg_common INTERFACE cxx_std_17)
+# OpenMP support for CPU parallel implementations.
+find_package(OpenMP REQUIRED COMPONENTS CXX)
 
 # Solver targets will be added in their respective tasks:
 # - cg_serial
@@ -43,6 +45,16 @@ add_library(cg_serial STATIC
 )
 
 target_link_libraries(cg_serial PUBLIC cg_ops)
+# OpenMP numerical operations: parallel CSR SpMV and
+# subsequent parallel vector/reduction kernels.
+add_library(cg_openmp_ops STATIC
+    src/openmp/openmp_ops.cpp
+)
+
+target_link_libraries(cg_openmp_ops PUBLIC
+    cg_common
+    OpenMP::OpenMP_CXX
+)
 
 # Shared 2D/3D Poisson matrix generators.
 # Reusable by serial, OpenMP, MPI and hybrid solvers.
@@ -94,6 +106,21 @@ if(BUILD_TESTING)
     add_executable(test_csr_ops tests/test_csr_ops.cpp)
     target_link_libraries(test_csr_ops PRIVATE cg_ops)
     add_test(NAME csr_matvec COMMAND test_csr_ops)
+    # OpenMP CSR SpMV correctness tests.
+    # Compare parallel operations against the serial reference.
+    add_executable(test_openmp_ops
+        tests/test_openmp_ops.cpp
+    )
+
+    target_link_libraries(test_openmp_ops PRIVATE
+        cg_openmp_ops
+        cg_ops
+    )
+
+    add_test(
+        NAME openmp_spmv
+        COMMAND test_openmp_ops
+    )
     # Serial CG solver correctness tests.
     add_executable(test_serial_cg tests/test_serial_cg.cpp)
     target_link_libraries(test_serial_cg PRIVATE cg_serial cg_poisson)
