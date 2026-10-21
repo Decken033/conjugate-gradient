@@ -1,0 +1,15 @@
+experiment_group,source_csv,matrix,threads,schedule,chunk_size,runs,converged,median_seconds,min_seconds,max_seconds,max_true_relative_residual
+initial_policies,openmp_2d512_schedule_static.csv,poisson_2d_512,8,static,0,10,10,0.9860744480000001,0.942082866,1.16508109,9.52607566151259e-09
+initial_policies,openmp_2d512_schedule_dynamic.csv,poisson_2d_512,8,dynamic,0,10,10,15.5716961125,15.282772265,15.624317106,9.526075605634794e-09
+initial_policies,openmp_2d512_schedule_guided.csv,poisson_2d_512,8,guided,0,10,10,0.9990708184999999,0.95766229,1.205155046,9.526075648149043e-09
+dynamic_chunks,openmp_2d512_dynamic_chunk64.csv,poisson_2d_512,8,dynamic,64,10,10,3.149637167,3.092760883,3.250575646,9.526075901130536e-09
+dynamic_chunks,openmp_2d512_dynamic_chunk256.csv,poisson_2d_512,8,dynamic,256,10,10,2.7784991039999998,2.759205473,2.823134205,9.526075808549067e-09
+dynamic_chunks,openmp_2d512_dynamic_chunk1024.csv,poisson_2d_512,8,dynamic,1024,10,10,2.668196338,2.627055708,2.738958915,9.526075563483008e-09
+final_policies_and_chunks,openmp_sched_final_static_start.csv,poisson_2d_512,8,static,0,10,10,0.9919747155,0.984191152,1.007646277,9.526075749023381e-09
+final_policies_and_chunks,openmp_sched_final_dynamic_default.csv,poisson_2d_512,8,dynamic,0,10,10,18.923830088499997,18.807774624,20.842555488,9.526075899979787e-09
+final_policies_and_chunks,openmp_sched_final_dynamic_64.csv,poisson_2d_512,8,dynamic,64,10,10,2.0313550995,1.641875295,2.255197143,9.526075371170181e-09
+final_policies_and_chunks,openmp_sched_final_dynamic_256.csv,poisson_2d_512,8,dynamic,256,10,10,2.7606147654999997,1.476405508,2.82872954,9.526075557798446e-09
+final_policies_and_chunks,openmp_sched_final_dynamic_1024.csv,poisson_2d_512,8,dynamic,1024,10,10,2.6564017015,2.595037354,2.68024713,9.526075658126612e-09
+final_policies_and_chunks,openmp_sched_final_dynamic_4096.csv,poisson_2d_512,8,dynamic,4096,10,10,2.592541222,2.486890232,2.641548549,9.526075503185725e-09
+final_policies_and_chunks,openmp_sched_final_guided_default.csv,poisson_2d_512,8,guided,0,10,10,2.709941095,2.690482881,2.781750781,9.52607582007333e-09
+final_policies_and_chunks,openmp_sched_final_static_end.csv,poisson_2d_512,8,static,0,10,10,2.3906496534999997,2.337030313,2.426639925,9.526075727456907e-09

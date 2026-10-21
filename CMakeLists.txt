@@ -64,6 +64,17 @@ add_library(cg_openmp STATIC
 target_link_libraries(cg_openmp PUBLIC
     cg_openmp_ops
 )
+
+# OpenMP CG performance benchmarking library.
+# Provides repeated solver timing and CSV reporting.
+add_library(cg_openmp_benchmark STATIC
+    src/openmp/benchmark_openmp.cpp
+    src/openmp/benchmark_openmp_csv.cpp
+)
+
+target_link_libraries(cg_openmp_benchmark PUBLIC
+    cg_openmp
+)
 # Shared 2D/3D Poisson matrix generators.
 # Reusable by serial, OpenMP, MPI and hybrid solvers.
 add_library(cg_poisson STATIC
@@ -102,6 +113,19 @@ target_link_libraries(run_serial_benchmark PRIVATE
     cg_serial_benchmark
     cg_poisson
     cg_matrix_market
+)
+
+# Command-line runner for OpenMP CG performance benchmarking.
+# Supports Poisson matrices and the thermal2 Matrix Market input.
+add_executable(run_openmp_benchmark
+    src/openmp/run_openmp_benchmark.cpp
+)
+
+target_link_libraries(run_openmp_benchmark PRIVATE
+    cg_openmp_benchmark
+    cg_poisson
+    cg_matrix_market
+    cg_ops
 )
 
 include(CTest)

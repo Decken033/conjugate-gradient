@@ -68,13 +68,15 @@ double compute_solution_error(
 
 } // namespace
 
+
 std::vector<SerialBenchmarkRecord> benchmark_serial_cg(
     const CSRMatrix& A,
     const std::vector<double>& b,
     const std::vector<double>& exact_solution,
     const std::string& matrix_name,
     std::size_t repeats,
-    const CGOptions& options
+    const CGOptions& options,
+    std::size_t warmups
 ) {
     A.validate();
 
@@ -100,26 +102,37 @@ std::vector<SerialBenchmarkRecord> benchmark_serial_cg(
     }
     using Clock = std::chrono::steady_clock;
 
-    // Warm-up is intentionally excluded from measurements.
-    std::cout
-        << "[Serial CG] Matrix: " << matrix_name
-        << " | Warm-up started..."
-        << std::endl;
+    // All warm-up solves are excluded from measurements.
+    // Configurable warm-ups help stabilize performance
+    // before collecting timing results.
+    for (std::size_t warmup_index = 0;
+         warmup_index < warmups;
+         ++warmup_index) {
 
-    const auto warmup = solve_serial_cg(A, b, options);
+        std::cout
+            << "[Serial CG] Matrix: " << matrix_name
+            << " | Warm-up " << (warmup_index + 1)
+            << "/" << warmups
+            << " started..."
+            << std::endl;
 
-    if (!warmup.converged) {
-        throw std::runtime_error(
-            "Benchmark: warm-up CG solve did not converge"
-        );
+        const auto warmup = solve_serial_cg(A, b, options);
+
+        if (!warmup.converged) {
+            throw std::runtime_error(
+                "Benchmark: warm-up CG solve did not converge"
+            );
+        }
+
+        std::cout
+            << "[Serial CG] Warm-up "
+            << (warmup_index + 1)
+            << "/" << warmups
+            << " completed"
+            << " | iterations=" << warmup.iterations
+            << " | residual=" << warmup.relative_residual
+            << std::endl;
     }
-
-    std::cout
-        << "[Serial CG] Warm-up completed"
-        << " | iterations=" << warmup.iterations
-        << " | residual=" << warmup.relative_residual
-        << std::endl;
-
     std::vector<SerialBenchmarkRecord> records;
     records.reserve(repeats);
 

@@ -33,13 +33,15 @@ struct SerialBenchmarkRecord {
 // Each measured run uses identical A, b, options and x0 = 0.
 // The known exact solution is used to calculate accuracy
 // outside the timed section.
+
 std::vector<SerialBenchmarkRecord> benchmark_serial_cg(
     const CSRMatrix& A,
     const std::vector<double>& b,
     const std::vector<double>& exact_solution,
     const std::string& matrix_name,
     std::size_t repeats = 5,
-    const CGOptions& options = {}
+    const CGOptions& options = {},
+    std::size_t warmups = 1
 );
  // Write benchmark records to a CSV file.
  // Creates or overwrites the specified output file.

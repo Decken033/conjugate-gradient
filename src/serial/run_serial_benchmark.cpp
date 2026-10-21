@@ -61,11 +61,11 @@ std::size_t parse_positive_size(const std::string& text) {
 } // namespace
 
 int main(int argc, char* argv[]) {
-    if (argc != 5) {
+    if (argc != 5 && argc != 6) {
         std::cerr
             << "Usage: " << argv[0]
             << " <2d|3d|thermal2> <grid_size|matrix.mtx>"
-            << " <repeats> <output.csv>\n";
+            << " <repeats> <output.csv> [warmups]\n";
         return 1;
     }
 
@@ -75,7 +75,9 @@ int main(int argc, char* argv[]) {
         const std::size_t repeats =
             parse_positive_size(argv[3]);
         const std::string output_path = argv[4];
-
+        // Optional warm-up count; retain one warm-up by default.
+        const std::size_t warmups =
+            argc == 6 ? parse_positive_size(argv[5]) : 1;
         cg::CSRMatrix A;
         std::string matrix_name;
 
@@ -122,7 +124,8 @@ int main(int argc, char* argv[]) {
             exact_solution,
             matrix_name,
             repeats,
-            options
+            options,
+            warmups
         );
 
         // Writing CSV occurs after all timed runs.

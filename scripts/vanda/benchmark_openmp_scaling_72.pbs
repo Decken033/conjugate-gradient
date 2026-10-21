@@ -1,0 +1,41 @@
+#!/bin/bash
+#PBS -N dsa5208_scaling72
+#PBS -P personal-e1536052
+#PBS -q auto
+#PBS -l select=1:ncpus=72:mem=8gb
+#PBS -l walltime=00:30:00
+#PBS -j oe
+
+set -euo pipefail
+
+module load CMake/3.27.6-GCCcore-13.2.0
+cd "$HOME/scratch/DSA5208/conjugate-gradient"
+
+export OMP_PROC_BIND=close
+export OMP_PLACES=cores
+export OMP_DYNAMIC=FALSE
+
+mkdir -p results
+
+echo "=== Benchmark environment ==="
+echo "Host: $(hostname)"
+echo "PBS job: $PBS_JOBID"
+taskset -pc $$
+
+lscpu | grep -E \
+'^Model name:|^CPU\(s\):|^Thread\(s\) per core:|^Core\(s\) per socket:|^Socket\(s\):|^NUMA node\(s\):'
+
+echo "=== Serial reference ==="
+./build/run_serial_benchmark \
+    2d 512 10 \
+    results/serial_2d512_scaling72.csv 4
+
+for t in 1 2 4 8 16 32 36 72; do
+    echo "=== OpenMP ${t} threads ==="
+
+    ./build/run_openmp_benchmark \
+        2d 512 "$t" static 0 10 \
+        "results/openmp_2d512_scaling72_t${t}.csv" 4
+done
+
+echo "=== 72-core scaling benchmark completed ==="
