@@ -14,7 +14,7 @@ Ax=b,
 
 where \(A\) is a sparse SPD matrix. The serial implementation provides the tested reference solver and shared matrix infrastructure used to develop and evaluate the parallel versions.
 
-**Status as of 21 October 2026:** Person A's **Task 1 (serial CG)** is implemented, tested and merged into `main`. **Task 2 (CPU OpenMP CG)** is implemented on `feat/openmp-cg`, validated on Vanda, and undergoing final PR preparation. The final Release CMake build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). MPI and hybrid implementations are teammate responsibilities; their completion is not asserted here. GPU OpenMP offloading has been proposed as an optional follow-on but is not implemented in this CPU branch.
+**Status as of 21 October 2026: Task A (Person A) COMPLETED.** Both **Task 1 (serial CG)** and **Task 2 (CPU OpenMP CG)** have been implemented, tested, benchmarked, documented, and **merged directly into `main`** (latest Task A commit `c35e9d8`). The final Vanda Release CMake build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). MPI and hybrid implementations remain teammate responsibilities; their completion is not asserted here. **OpenMP GPU target offloading is an optional extension, to be considered only if time permits; it has not been implemented or benchmarked.**
 
 **Person A report:** [REPORT_TASK_A.md](REPORT_TASK_A.md) — implementation, correctness, measured scaling, scheduling, reproducibility and limitations. [Full benchmark tables](docs/task_a/benchmark_tables.md) and [experimental methodology](docs/task_a/benchmark_methodology.md) support that report.
 
@@ -23,10 +23,10 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 | Implementation | Parallelization | Status |
 |---|---|---|
 | Serial CG | Single CPU thread | **Completed; merged into `main`; numerical validation and benchmarks passed** |
-| CPU OpenMP CG | Shared-memory multithreading | **Implemented; 7/7 tests passed; scaling/scheduling results archived; PR pending** |
+| CPU OpenMP CG | Shared-memory multithreading | **Completed and merged into `main`**; 7/7 tests passed; scaling/scheduling results and report committed |
 | MPI CG | Distributed-memory multiprocessing | Pending / team integration (Person B) |
 | Hybrid CG | MPI + CPU OpenMP | Pending / team integration (Person C) |
-| GPU CG | OpenMP target offloading | Optional extension; **not implemented** |
+| GPU CG | OpenMP target offloading | **Optional extension if time permits**; not implemented or benchmarked |
 
 ### Completed Task 1 capabilities
 
@@ -38,7 +38,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 - **Benchmark harness:** configurable untimed CG warmups (one by default), individually timed solver-only repetitions, immediate warm-up / per-run progress messages, numerical accuracy checks outside the timed region, and a CSV row per measured repetition.
 - **Correctness and integration checks:** small CSR and CG cases, Poisson systems, benchmark CSV tests, Matrix Market loader fixtures, and full `thermal2` CSR validation.
 
-### Task 2 CPU OpenMP capabilities (implemented on `feat/openmp-cg`)
+### Completed Task 2 CPU OpenMP capabilities (merged into `main`)
 
 - **Parallel CG solver:** shared-memory OpenMP variant using parallel CSR sparse matrix–vector multiplication, vector operations and dot-product reductions; configurable thread count.
 - **Scheduling control:** `static`, `dynamic`, and `guided` scheduling, with optional chunk size; zero selects the implementation's default chunk behaviour.
@@ -53,7 +53,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 
 | Member | Primary responsibility |
 |---|---|
-| Person A | Serial CG, CPU OpenMP CG, optional GPU OpenMP offloading |
+| Person A | **Task A completed:** Task 1 serial CG and Task 2 CPU OpenMP CG; optional GPU OpenMP offloading only if time permits |
 | Person B | MPI CG and integration of the shared matrix-generation utilities |
 | Person C | Hybrid MPI + OpenMP CG, independent benchmarking and GPU comparisons |
 
@@ -170,7 +170,7 @@ conjugate-gradient/
 │       ├── benchmark_methodology.md
 │       ├── benchmark_tables.md
 │       ├── figures/                # Four report-ready charts
-│       └── results/                # Selected consolidated CSVs
+│       └── consolidated/           # Selected consolidated CSVs
 ├── include/
 │   ├── csr_matrix.hpp
 │   ├── csr_ops.hpp
@@ -179,6 +179,7 @@ conjugate-gradient/
 │   ├── matrix_market.hpp
 │   ├── serial_benchmark.hpp
 │   ├── openmp_ops.hpp
+│   ├── openmp_solver.hpp
 │   └── openmp_benchmark.hpp
 ├── src/
 │   ├── common/                     # Matrix/vector utilities and loaders
@@ -356,7 +357,7 @@ Three-run statistics: mean **148.253 s**, sample standard deviation **1.911 s**,
 
 The complete three-run command took **10 min 0.576 s elapsed**, because it included one warm-up and three measured solves, plus loading and other overhead. For future speedup, the preliminary serial reference is the **three-run median solver time, 148.122 s**, subject to repeating baseline measurements under a comparable allocation when parallel benchmarking begins.
 
-Results file: `results/serial_thermal2_3runs.csv` (selected CSV staged for Git). The initial file `results/serial_thermal2_initial.csv` remains local/ignored unless explicitly added later.
+Results file: `results/serial_thermal2_3runs.csv` (retained in the local benchmark archive; generated `results/` files are Git-ignored by default). The initial file `results/serial_thermal2_initial.csv` remains local/ignored unless explicitly added later.
 
 ### 9.4 Vanda performance variability investigation (CN-016)
 
@@ -409,19 +410,19 @@ See [Person A report](REPORT_TASK_A.md), [tables](docs/task_a/benchmark_tables.m
 
 ### 9.7 Team-wide parallel evaluation (forthcoming)
 
-MPI and hybrid comparisons should use compatible matrices, numerical tolerance and timing boundaries. For MPI/hybrid timings, use the slowest rank's relevant solve elapsed time and account for MPI rank/thread allocations and communication. Further GPU offloading remains a separate optional investigation; **no GPU speedups are claimed here**.
+MPI and hybrid comparisons should use compatible matrices, numerical tolerance and timing boundaries. For MPI/hybrid timings, use the slowest rank's relevant solve elapsed time and account for MPI rank/thread allocations and communication. GPU OpenMP target offloading may be investigated **only if time permits**, as a separate optional extension; **no GPU implementation or speedups are claimed here**.
 
 ## 10. Development Workflow
 
-Development uses Git feature branches and pull requests:
+Development uses Git feature branches and direct integration into `main` for completed, validated work:
 
 1. Develop a scoped task on a feature branch.
 2. Build on Vanda and run applicable correctness/integration tests.
 3. Preserve representative benchmark CSVs and document reproducible commands.
 4. Review source diff, documentation, numerical outputs and ignored artifacts.
-5. Commit and push the branch, open a PR, and merge after team review.
+5. Commit and push the branch; integrate into `main` after checking the updated base branch and reviewing the changes.
 
-Task 1 serial implementation is already merged into `main`. Task 2 CPU OpenMP implementation and pending benchmark additions are being finalized on **`feat/openmp-cg`**. This README/report bundle is prepared for that PR, but the new documentation is not described as merged until a teammate approves and merges it.
+**Task A is complete and integrated.** Task 1 serial CG was previously merged into `main` (`9c7648e`). Task 2 CPU OpenMP CG, its correctness tests, benchmark runners, consolidated evidence, figures, and the Person A report were subsequently merged **directly into `main`** by fast-forward merge and pushed to GitHub (latest commit `c35e9d8`, 21 October 2026). No pull request was used. MPI and hybrid integration will be handled separately by teammates.
 
 Git ignores build outputs, downloaded matrices (`data/*`) and generated benchmark results (`results/*`) by default. Select representative small CSVs for version control explicitly, for example:
 
@@ -444,14 +445,14 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 |---|---|
 | Task 0 — C++17/CMake/CSR foundation | Completed for serial and CPU OpenMP workflows |
 | Task 1 — Serial CG and shared utilities | **Implemented and merged into `main`**; Poisson/`thermal2`, CSR and numerical tests verified |
-| Task 2 — CPU OpenMP CG | **Implemented** on `feat/openmp-cg`; CSR SpMV, CG numerical operations and configurable scheduling |
+| Task 2 — CPU OpenMP CG | **Completed and merged into `main`**; CSR SpMV, CG numerical operations, tests and configurable scheduling |
 | Task 2 benchmark interface | Serial-compatible CSV schema, configurable warmups, CLI for 2D/3D/`thermal2` |
 | Task 2 numerical evidence | Selected cases **54/54 converged**, including 3D Poisson and `thermal2` |
 | Task 2 scaling and scheduling | 512² and 1024² **180/180** strong-scaling measurements converged; scheduling **140/140** converged |
 | Task 2 final build | **7/7 CTest tests passed** on CN-006, PBS job `1471910`, 21 Oct 2026 |
-| Task 2 PR | Benchmark source and documentation being staged/reviewed; **not yet merged** |
+| Task A — Person A completion and integration | **COMPLETED**: Task 1 + Task 2, benchmarks, figures, README and `REPORT_TASK_A.md` merged directly into `main` (`c35e9d8`); no PR required |
 | MPI / hybrid | Team integration handled separately; completion not verified by Person A evidence |
-| OpenMP GPU offload | Suggested optional extension; **not implemented or benchmarked** in this branch |
+| OpenMP GPU offload | **Optional extension if time permits**; not implemented or benchmarked; outside completed Task A scope |
 
 Full Person A reporting and evidence: [REPORT_TASK_A.md](REPORT_TASK_A.md).
 
@@ -463,4 +464,4 @@ These are **optional** beyond the core project scope:
 2. **Matrix conditioning:** study how conditioning influences CG convergence and residual-versus-solution-error behavior.
 3. **GMRES comparison:** compare convergence and computational expense against a non-CG iterative method, if time and project scope allow.
 
-Prioritize completing the CPU OpenMP PR and integrating teammate MPI/hybrid results before undertaking these optional investigations. GPU offloading, if pursued, should be a separate branch with independently validated GPU hardware/compiler support and numerical correctness.
+**Task A is already complete and merged into `main`.** Priority now shifts to teammates' MPI/hybrid integration and the group-wide evaluation. **GPU OpenMP target offloading is optional and will be pursued only if time permits** after core deliverables; any such work should use a separate branch and independently validate compiler/hardware support, numerical correctness and performance.
