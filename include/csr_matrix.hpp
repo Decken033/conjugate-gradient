@@ -23,12 +23,7 @@ struct CSRMatrix {
         return values.size();
     }
 
-    void validate() const {
-        if (rows != cols) {
-            throw std::invalid_argument(
-                "CG requires a square matrix");
-        }
-
+    void validate_structure() const {
         if (row_ptr.size() != rows + 1) {
             throw std::invalid_argument(
                 "Invalid CSR row_ptr size");
@@ -58,6 +53,14 @@ struct CSRMatrix {
                     "CSR column index out of bounds");
             }
         }
+    }
+
+    void validate() const {
+        if (rows != cols) {
+            throw std::invalid_argument(
+                    "CG requires a square matrix");
+        }
+        validate_structure();
     }
 };
 

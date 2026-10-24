@@ -1,0 +1,88 @@
+#!/bin/bash
+# DSA5208 MPI CG - 512x512 Strong Scaling
+# Ranks: 1, 2, 4, 8, 16, 32, 36, 72
+# 4 warmups + 10 measured runs
+
+#PBS -N dsa5208_mpi_scaling_512
+#PBS -P personal-diqingxu
+#PBS -q auto
+#PBS -l select=2:ncpus=36:mpiprocs=36:mem=32gb
+#PBS -l place=scatter
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+PROJECT_DIR="/scratch/diqingxu/DSA5208/conjugate-gradient"
+
+cd "$PROJECT_DIR"
+
+echo "=== MPI Strong Scaling Benchmark ==="
+echo "Job ID: $PBS_JOBID"
+echo "Host: $(hostname)"
+echo "Start: $(date)"
+
+# Use the same toolchain as the successful build
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+export OMP_NUM_THREADS=1
+
+echo "=== MPI Environment ==="
+which mpirun
+mpirun --version | head -n 1
+echo "PATH=${PATH}"
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
+
+echo "=== Linked MPI Libraries ==="
+ldd ./build/run_mpi_benchmark | grep libmpi || true
+
+echo "=== Allocated Nodes ==="
+sort "$PBS_NODEFILE" | uniq -c
+
+mkdir -p results/mpi
+
+# OpenMPI's PBS integration may be unavailable on compute nodes. Build an
+# explicit hostfile from PBS's allocation so multi-node launches see all slots.
+MPI_HOSTFILE="${PROJECT_DIR}/results/mpi/mpi_hostfile_${PBS_JOBID}"
+awk '{slots[$1]++} END {for (host in slots) print host " slots=" slots[host]}' \
+    "$PBS_NODEFILE" > "$MPI_HOSTFILE"
+trap 'rm -f "$MPI_HOSTFILE"' EXIT
+echo "=== MPI Hostfile ==="
+cat "$MPI_HOSTFILE"
+
+# The executable was already built and tested
+test -x ./build/run_mpi_benchmark
+
+MATRIX_SIZE=512
+REPEATS=10
+WARMUPS=4
+RESULTS_DIR="results/mpi"
+
+for RANKS in 1 2 4 8 16 32 36 72; do
+
+    OUTPUT_FILE="${RESULTS_DIR}/mpi_2d${MATRIX_SIZE}_p${RANKS}_${PBS_JOBID}.csv"
+
+    echo "=== Running ${RANKS} MPI ranks ==="
+
+    mpirun -np "$RANKS" \
+        --hostfile "$MPI_HOSTFILE" \
+        -x PATH \
+        -x LD_LIBRARY_PATH \
+        --map-by slot \
+        --bind-to core \
+        ./build/run_mpi_benchmark \
+        2d "$MATRIX_SIZE" \
+        "$REPEATS" \
+        "$OUTPUT_FILE" \
+        "$WARMUPS"
+
+    echo "Completed ${RANKS} ranks"
+
+done
+
+echo "=== 512x512 Scaling Completed ==="
+echo "End: $(date)"
+
+ls -lh results/mpi/mpi_2d512_p*_"${PBS_JOBID}".csv

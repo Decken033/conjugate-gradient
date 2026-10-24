@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+<title id="title">MPI strong-scaling speedup and efficiency</title>
+<desc id="desc">Measured mean solver-time speedup and parallel efficiency for 2D Poisson matrices of 512 by 512 and 1024 by 1024 over 1, 2, 4, 8, 16, 32, 36, and 72 MPI ranks. Both peak at 16 ranks and decline afterward.</desc>
+<rect width="1200" height="650" fill="#ffffff"/>
+<text x="600" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#17212b">MPI Strong Scaling: Mean Solver-Time Speedup and Efficiency</text>
+<text x="310" y="78" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#17212b">Speedup relative to 1 MPI rank</text>
+<text x="890" y="78" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#17212b">Parallel efficiency</text>
+<!-- Plot areas -->
+<rect x="95" y="105" width="440" height="420" fill="#fbfcfd" stroke="#d9e0e5"/>
+<rect x="665" y="105" width="440" height="420" fill="#fbfcfd" stroke="#d9e0e5"/>
+<!-- Horizontal grid, speedup scale 0..4 -->
+<g font-family="Arial,sans-serif" font-size="12" fill="#43515c" text-anchor="end">
+<text x="85" y="529">0</text><text x="85" y="424">1</text><text x="85" y="319">2</text><text x="85" y="214">3</text><text x="85" y="109">4</text>
+<text x="655" y="529">0%</text><text x="655" y="424">25%</text><text x="655" y="319">50%</text><text x="655" y="214">75%</text><text x="655" y="109">100%</text>
+</g>
+<g stroke="#e1e6ea" stroke-width="1"><path d="M95 525H535 M95 420H535 M95 315H535 M95 210H535 M95 105H535"/><path d="M665 525H1105 M665 420H1105 M665 315H1105 M665 210H1105 M665 105H1105"/></g>
+<!-- x labels -->
+<g font-family="Arial,sans-serif" font-size="12" fill="#43515c" text-anchor="middle">
+<text x="105" y="549">1</text><text x="166" y="549">2</text><text x="227" y="549">4</text><text x="288" y="549">8</text><text x="349" y="549">16</text><text x="410" y="549">32</text><text x="471" y="549">36</text><text x="532" y="549">72</text>
+<text x="675" y="549">1</text><text x="736" y="549">2</text><text x="797" y="549">4</text><text x="858" y="549">8</text><text x="919" y="549">16</text><text x="980" y="549">32</text><text x="1041" y="549">36</text><text x="1102" y="549">72</text>
+</g>
+<text x="315" y="580" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#43515c">MPI ranks</text><text x="885" y="580" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#43515c">MPI ranks</text>
+<!-- Speedup series: 512 teal, 1024 orange. y=525 - value*105; x as above -->
+<polyline points="105,420 166,398 227,281 288,233 349,227 410,309 471,331 532,464" fill="none" stroke="#087e8b" stroke-width="3"/>
+<polyline points="105,420 166,322 227,217 288,169 349,166 410,241 471,251 532,448" fill="none" stroke="#c45624" stroke-width="3"/>
+<!-- Efficiency: y=525 - e*420 -->
+<polyline points="675,105 736,271 797,281 858,378 919,450 980,498 1041,504 1102,522" fill="none" stroke="#087e8b" stroke-width="3" stroke-dasharray="8 5"/>
+<polyline points="675,105 736,120 797,216 858,347 919,435 980,489 1041,495 1102,521" fill="none" stroke="#c45624" stroke-width="3" stroke-dasharray="8 5"/>
+<!-- Markers -->
+<g fill="#087e8b" stroke="#fff" stroke-width="1.5"><circle cx="105" cy="420" r="5"/><circle cx="166" cy="398" r="5"/><circle cx="227" cy="281" r="5"/><circle cx="288" cy="233" r="5"/><circle cx="349" cy="227" r="5"/><circle cx="410" cy="309" r="5"/><circle cx="471" cy="331" r="5"/><circle cx="532" cy="464" r="5"/><circle cx="675" cy="105" r="5"/><circle cx="736" cy="271" r="5"/><circle cx="797" cy="281" r="5"/><circle cx="858" cy="378" r="5"/><circle cx="919" cy="450" r="5"/><circle cx="980" cy="498" r="5"/><circle cx="1041" cy="504" r="5"/><circle cx="1102" cy="522" r="5"/></g>
+<g fill="#c45624" stroke="#fff" stroke-width="1.5"><circle cx="105" cy="420" r="5"/><circle cx="166" cy="322" r="5"/><circle cx="227" cy="217" r="5"/><circle cx="288" cy="169" r="5"/><circle cx="349" cy="166" r="5"/><circle cx="410" cy="241" r="5"/><circle cx="471" cy="251" r="5"/><circle cx="532" cy="448" r="5"/><circle cx="675" cy="105" r="5"/><circle cx="736" cy="120" r="5"/><circle cx="797" cy="216" r="5"/><circle cx="858" cy="347" r="5"/><circle cx="919" cy="435" r="5"/><circle cx="980" cy="489" r="5"/><circle cx="1041" cy="495" r="5"/><circle cx="1102" cy="521" r="5"/></g>
+<!-- Legend -->
+<g font-family="Arial,sans-serif" font-size="13" fill="#26343e">
+<line x1="345" y1="615" x2="380" y2="615" stroke="#087e8b" stroke-width="3"/><text x="388" y="620">512×512</text>
+<line x1="480" y1="615" x2="515" y2="615" stroke="#c45624" stroke-width="3"/><text x="523" y="620">1024×1024</text>
+<line x1="650" y1="615" x2="685" y2="615" stroke="#596875" stroke-width="3"/><text x="693" y="620">Solid: speedup</text>
+<line x1="835" y1="615" x2="870" y2="615" stroke="#596875" stroke-width="3" stroke-dasharray="8 5"/><text x="878" y="620">Dashed: efficiency</text>
+</g>
+</svg>

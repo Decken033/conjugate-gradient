@@ -1,0 +1,36 @@
+
+#!/bin/bash
+#PBS -N dsa5208_build
+#PBS -P personal-diqingxu
+#PBS -q auto
+#PBS -l select=1:ncpus=4:mem=8gb
+#PBS -l walltime=00:30:00
+#PBS -j oe
+
+set -euo pipefail
+
+cd /scratch/diqingxu/DSA5208/conjugate-gradient
+
+echo "=== Job Information ==="
+echo "Node: $(hostname)"
+echo "Job ID: $PBS_JOBID"
+echo "Start: $(date)"
+
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+echo "=== Loaded Modules ==="
+module list
+
+echo "=== Configure ==="
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCG_ENABLE_MPI=ON
+
+echo "=== Compile ==="
+cmake --build build --parallel 4
+
+echo "=== Build Completed ==="
+date
+

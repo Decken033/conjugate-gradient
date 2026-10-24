@@ -1,0 +1,109 @@
+#!/bin/bash
+# MPI CG strong-scaling benchmark on NUS Vanda HPC
+#
+# Problem: 2D Poisson 512x512 (N=262144)
+# Rank counts: 1, 2, 4, 8, 16, 32, 36, 72
+# Each rank count: 4 warmups + 10 timed runs
+#
+# Strategy: request 2 full nodes (each 36-core) for up to 72 MPI ranks.
+# mpiprocs=36 ensures MPI launcher gets 36 slots per node.
+#
+# Output: results/mpi/mpi_scaling_2d512_<JOBID>.csv per rank count
+#
+# Usage:
+#   qsub scripts/vanda/benchmark_mpi_scaling.pbs
+#
+# MPI modules verified on Vanda (ENVIRONMENT.md):
+#   module load CMake/3.27.6-GCCcore-13.2.0
+#   module load openmpi/gcc/64/4.1.8
+#
+# Note: Loading CMake changes active GCC to 13.2.0.
+# The binary must be built with the same modules loaded.
+# See docs/ENVIRONMENT.md for toolchain caution.
+
+#PBS -N dsa5208_mpi_scaling_512
+#PBS -P personal-e1536052
+#PBS -q auto
+#PBS -l select=2:ncpus=36:mpiprocs=36:mem=32gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+echo "=== DSA5208 MPI CG Scaling Benchmark ==="
+echo "PBS job ID: $PBS_JOBID"
+echo "Host: $(hostname)"
+echo "Nodes: $(cat $PBS_NODEFILE | sort -u | paste -s -d,)"
+echo "Timestamp: $(date)"
+
+# Load modules (must match build environment)
+module load CMake/3.27.6-GCCcore-13.2.0
+module load openmpi/gcc/64/4.1.8
+
+# Verify tool versions
+echo ""
+echo "=== Module environment ==="
+g++ --version | head -1
+mpicxx --showme 2>&1 | head -1
+mpirun --version 2>&1 | head -1
+
+# Navigate to project root
+cd "$HOME/scratch/DSA5208/conjugate-gradient"
+
+# Build if needed
+echo ""
+echo "=== Build ==="
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=ON
+cmake --build build --parallel 8 --target run_mpi_benchmark
+
+# Create results directory
+mkdir -p results/mpi
+
+# Record hardware information
+echo ""
+echo "=== Hardware info ==="
+lscpu | grep -E \
+    '^Model name:|^CPU\(s\):|^Thread\(s\) per core:|^Core\(s\) per socket:|^Socket\(s\):|^NUMA node\(s\):'
+
+echo ""
+echo "=== Nodefile ==="
+cat $PBS_NODEFILE | sort -u
+
+# =====================================================================
+# Strong-scaling experiment: 2D Poisson 512x512
+# Fixed problem size: N=262144
+# MPI 1-rank baseline plus increasing rank counts
+# =====================================================================
+
+MATRIX_SIZE=512
+REPEATS=10
+WARMUPS=4
+RESULTS_DIR="results/mpi"
+
+echo ""
+echo "=== 2D Poisson ${MATRIX_SIZE}x${MATRIX_SIZE} (N=$((MATRIX_SIZE*MATRIX_SIZE))) ==="
+echo "Runs per configuration: $REPEATS (warmups: $WARMUPS)"
+echo ""
+
+for RANKS in 1 2 4 8 16 32 36 72; do
+    OUTPUT_FILE="${RESULTS_DIR}/mpi_2d${MATRIX_SIZE}_p${RANKS}_${PBS_JOBID}.csv"
+
+    echo "--- Ranks: ${RANKS} ---"
+
+    # Bind MPI processes to hardware threads
+    # --bind-to core: each MPI process gets exclusive core(s)
+    # --report-bindings: log process placement (visible in PBS stdout)
+    mpirun -np "${RANKS}" \
+        --bind-to core \
+        ./build/run_mpi_benchmark \
+            2d "${MATRIX_SIZE}" \
+            "${REPEATS}" \
+            "${OUTPUT_FILE}" \
+            "${WARMUPS}"
+
+    echo ""
+done
+
+echo "=== 512x512 scaling completed ==="
+echo "Results in: ${RESULTS_DIR}/"
+ls -lh "${RESULTS_DIR}"/mpi_2d${MATRIX_SIZE}_p*_${PBS_JOBID}.csv 2>/dev/null || true

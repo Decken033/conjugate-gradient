@@ -1,0 +1,47 @@
+
+#!/bin/bash
+#PBS -N mpi_small_bench
+#PBS -P personal-diqingxu
+#PBS -q auto
+#PBS -l select=1:ncpus=4:mem=8gb:mpiprocs=4
+#PBS -l walltime=00:30:00
+#PBS -j oe
+
+set -euo pipefail
+
+cd /scratch/diqingxu/DSA5208/conjugate-gradient
+
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+export OMP_NUM_THREADS=1
+
+mkdir -p results/mpi
+
+echo "=== Small-Scale Benchmark ==="
+echo "Node: $(hostname)"
+echo "Start: $(date)"
+
+echo "=== Serial Baseline ==="
+
+./build/run_serial_benchmark \
+    2d 128 5 \
+    results/serial_2d128.csv 1
+
+echo "=== MPI Benchmark ==="
+
+for RANKS in 1 2 4; do
+
+    echo "MPI ranks: $RANKS"
+
+    mpirun -n "$RANKS" \
+        ./build/run_mpi_benchmark \
+        2d 128 5 \
+        "results/mpi/bench_2d128_p${RANKS}.csv" \
+        1
+
+done
+
+echo "=== Benchmark Completed ==="
+date

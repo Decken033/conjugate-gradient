@@ -14,7 +14,7 @@ Ax=b,
 
 where \(A\) is a sparse SPD matrix. The serial implementation provides the tested reference solver and shared matrix infrastructure used to develop and evaluate the parallel versions.
 
-**Status as of 21 October 2026: Task A (Person A) COMPLETED.** Both **Task 1 (serial CG)** and **Task 2 (CPU OpenMP CG)** have been implemented, tested, benchmarked, documented, and **merged directly into `main`** (latest Task A commit `c35e9d8`). The final Vanda Release CMake build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). MPI and hybrid implementations remain teammate responsibilities; their completion is not asserted here. **OpenMP GPU target offloading is an optional extension, to be considered only if time permits; it has not been implemented or benchmarked.**
+**Project status through 24 October 2026.** Task A (Person A) completed serial and CPU OpenMP CG; both were tested, benchmarked, documented, and merged into `main` (latest Task A commit `c35e9d8`). Its Vanda Release build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). Person B's MPI implementation and two scaling campaigns are also complete and documented below; the hybrid implementation remains Person C's responsibility. **OpenMP GPU target offloading is optional and has not been implemented or benchmarked.**
 
 **Person A report:** [REPORT_TASK_A.md](REPORT_TASK_A.md) — implementation, correctness, measured scaling, scheduling, reproducibility and limitations. [Full benchmark tables](docs/task_a/benchmark_tables.md) and [experimental methodology](docs/task_a/benchmark_methodology.md) support that report.
 
@@ -24,7 +24,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 |---|---|---|
 | Serial CG | Single CPU thread | **Completed; merged into `main`; numerical validation and benchmarks passed** |
 | CPU OpenMP CG | Shared-memory multithreading | **Completed and merged into `main`**; 7/7 tests passed; scaling/scheduling results and report committed |
-| MPI CG | Distributed-memory multiprocessing | Pending / team integration (Person B) |
+| MPI CG | Distributed-memory multiprocessing | **Implemented, built and validated on Vanda**; correctness and 512²/1024² scaling results documented (Person B) |
 | Hybrid CG | MPI + CPU OpenMP | Pending / team integration (Person C) |
 | GPU CG | OpenMP target offloading | **Optional extension if time permits**; not implemented or benchmarked |
 
@@ -47,6 +47,21 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 - **Strong scaling:** 512×512 best observed median **0.916491 s / 2.264× serial-relative speedup at 8 threads**; 1024×1024 best observed median **7.186726 s / 5.090× at 72 threads**. Both experiments used ten measurements after four warmups per configuration.
 - **Automated tests:** final Vanda Release build passed **7/7 tests** on CN-006, PBS job `1471910`; the broader large-matrix benchmarks are additional evidence rather than CTest cases.
 
+### Person B MPI CG implementation (implemented and validated on Vanda)
+
+- **Row-wise CSR partitioning:** `partition_matrix()` distributes global matrix rows among MPI ranks; supports non-divisible N/P; rebases local row_ptr; preserves global column indices.
+- **Distributed SpMV:** `mpi_csr_matvec()` performs `MPI_Allgatherv` internally to replicate the x vector, then computes local rows using standard CSR SpMV. Communication: O(N) per call.
+- **Distributed reductions:** `mpi_dot()` and `mpi_norm2()` use `MPI_Allreduce(MPI_SUM)`. All ranks receive the global scalar.
+- **Distributed true residual:** `mpi_true_residual()` computes `b - Ax` in distributed manner using SpMV and local subtraction. No serial gather to rank 0.
+- **Collective-safe CG solver:** `solve_mpi_cg()` uses the same algorithm as `solve_serial_cg`. All convergence, breakdown, and restart decisions are globally consistent via `MPI_Allreduce`. No rank-specific early exits.
+- **MPI benchmark harness:** `benchmark_mpi_cg()` times `solve_mpi_cg()` with MPI_Wtime, reduces to max across ranks (`MPI_Reduce(MPI_MAX)`). Only rank 0 writes CSV (same schema as serial/OpenMP, `solver=mpi`, `threads=1`).
+- **Modular interface for Person C:** `cg_mpi_ops` (partitioning, SpMV, dot) is separate from `cg_mpi` (CG solver), enabling Person C to reuse the partition data structure and add OpenMP-parallelized local operations.
+- **CMake integration:** optional `CG_ENABLE_MPI=ON/OFF` flag; Serial and OpenMP builds unaffected when MPI is absent.
+- **Three automated test executables:** `test_mpi_partition`, `test_mpi_spmv`, `test_mpi_cg` covering partition correctness, SpMV vs serial reference, CG convergence, single-rank vs serial, and non-divisible partitions.
+- **PBS scripts:** `scripts/vanda/test_mpi_correctness.pbs`, `benchmark_mpi_scaling.pbs`, `benchmark_mpi_scaling_1024.pbs`.
+
+**Person B reports:** [English](REPORT_TASK_B.md) and [Chinese](REPORT_TASK_B_ZH.md) — design, algorithm, benchmark methodology, reproduction instructions, correctness evidence and 512²/1024² scaling results. They include mean solver times, speedups, efficiencies and a [scaling figure](docs/task_b/mpi_scaling.svg) derived from the selected CSV records.
+
 **Shared interfaces:** `cg::CSRMatrix`, `cg::csr_matvec`, `cg::make_poisson_2d`, `cg::make_poisson_3d` and `cg::load_matrix_market` can be reused by other solver implementations. For MPI, matrix partitioning and rank-wise distribution remain separate implementation work; every rank need not independently load the full matrix.
 
 ## 3. Team Responsibilities
@@ -54,10 +69,10 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 | Member | Primary responsibility |
 |---|---|
 | Person A | **Task A completed:** Task 1 serial CG and Task 2 CPU OpenMP CG; optional GPU OpenMP offloading only if time permits |
-| Person B | MPI CG and integration of the shared matrix-generation utilities |
+| Person B | MPI CG using the shared matrix-generation utilities |
 | Person C | Hybrid MPI + OpenMP CG, independent benchmarking and GPU comparisons |
 
-The original work split assigned shared Poisson generation to Person B. During Task 1, Person A implemented the shared Poisson generators and Matrix Market loader so that all solver implementations can use common inputs. Coordination and integration with Person B remain necessary.
+The original work split assigned shared Poisson generation to Person B. During Task 1, Person A implemented the shared Poisson generators and Matrix Market loader; Person B's MPI implementation reuses these shared interfaces.
 
 All implementations should adhere to the common numerical specification and shared interfaces. See [Project Specification](docs/PROJECT_SPEC.md).
 
@@ -193,6 +208,36 @@ conjugate-gradient/
 
 MPI/hybrid directories may be added or updated independently by teammates. The `docs/task_a` report artifacts are selected documentation outputs, not a replacement for the complete local HPC archive.
 
+### Person B MPI structure
+
+```text
+conjugate-gradient/
+├── REPORT_TASK_B.md               # Person B report (MPI CG)
+├── include/
+│   ├── mpi_partition.hpp          # Distributed CSR matrix partitioning
+│   ├── mpi_ops.hpp                # Distributed SpMV, dot, norm, vector ops
+│   ├── mpi_solver.hpp             # MPI CG solver interface
+│   └── mpi_benchmark.hpp         # MPI benchmark harness
+├── src/mpi/                       # MPI source implementations
+│   ├── mpi_partition.cpp
+│   ├── mpi_ops.cpp
+│   ├── mpi_solver.cpp
+│   ├── benchmark_mpi.cpp
+│   ├── benchmark_mpi_csv.cpp
+│   └── run_mpi_benchmark.cpp
+├── tests/
+│   ├── test_mpi_partition.cpp     # Partition correctness (7 tests)
+│   ├── test_mpi_spmv.cpp          # SpMV vs serial (7 tests)
+│   └── test_mpi_cg.cpp            # CG convergence (8 tests)
+├── scripts/vanda/
+│   ├── test_mpi_correctness.pbs   # Correctness test PBS script
+│   ├── benchmark_mpi_scaling.pbs  # 512² strong-scaling PBS script
+│   └── benchmark_mpi_scaling_1024.pbs  # 1024² strong-scaling PBS script
+└── docs/task_b/
+    ├── implementation_design.md
+    └── benchmark_methodology.md
+```
+
 ### Relevant CMake targets
 
 | Target | Purpose |
@@ -201,7 +246,10 @@ MPI/hybrid directories may be added or updated independently by teammates. The `
 | `cg_serial`, `cg_serial_benchmark`, `run_serial_benchmark` | Serial solver and benchmark CLI |
 | `cg_openmp_ops`, `cg_openmp` | CPU OpenMP numerical operations and CG solver |
 | `cg_openmp_benchmark`, `run_openmp_benchmark` | CPU OpenMP timing, CSV output and benchmark CLI |
-| CTest targets | `csr_validation`, `csr_matvec`, `openmp_spmv`, `openmp_cg`, `serial_cg`, `serial_benchmark`, `matrix_market` |
+| `cg_mpi_ops` | MPI partition, distributed SpMV, dot, norm (requires `CG_ENABLE_MPI=ON`) |
+| `cg_mpi` | MPI CG solver |
+| `cg_mpi_benchmark`, `run_mpi_benchmark` | MPI timing, CSV output, benchmark CLI |
+| CTest targets | `csr_validation`, `csr_matvec`, `openmp_spmv`, `openmp_cg`, `serial_cg`, `serial_benchmark`, `matrix_market`, `mpi_partition` (4-rank), `mpi_spmv` (4-rank), `mpi_cg` (4-rank) |
 
 ## 7. Development Environment
 
@@ -214,7 +262,7 @@ Primary testing and benchmarking environment: **NUS Vanda HPC**.
 | CMake module | `CMake/3.27.6-GCCcore-13.2.0` |
 | CPU observed during performance investigation | Intel Xeon Platinum 8452Y (CN-016) |
 | Shared-memory OpenMP | CPU solver built and validated on Vanda; 1–72-thread scaling measured |
-| Open MPI | 4.1.8 (environment checked; solver pending) |
+| Open MPI | 4.1.6 in recorded MPI scaling jobs; the correctness job's CMake configuration resolved the 4.1.6 MPI compiler despite requesting the site 4.1.8 module |
 | NVIDIA GPU | A40 observed elsewhere on Vanda; GPU solver not implemented in this branch |
 | NVIDIA HPC SDK | 24.5 (offload feasibility checked) |
 
@@ -305,6 +353,56 @@ run_openmp_benchmark <2d|3d|thermal2> <grid_size|matrix.mtx> <threads> <static|d
 ```
 
 **Use PBS for multi-core compute and benchmarks.** The two published 72-core scaling protocols are [512×512 PBS script](scripts/vanda/benchmark_openmp_scaling_72.pbs) and [1024×1024 PBS script](scripts/vanda/benchmark_openmp_scaling_1024.pbs). Pre-existing results under `results/` can be overwritten by running those scripts; use a separate output directory for a new campaign.
+
+### Build and run MPI CG (Person B)
+
+MPI is optional. On Vanda, load MPI module before building:
+
+```bash
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+# Build with MPI enabled (default)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=ON
+cmake --build build --parallel 8
+
+# Build without MPI (Serial and OpenMP only)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=OFF
+```
+
+Run MPI correctness tests:
+
+```bash
+# CTest (4-rank run via mpiexec)
+ctest --test-dir build --output-on-failure -R mpi
+
+# Manual multi-rank tests
+for N in 1 2 4; do
+    mpirun -np $N ./build/test_mpi_partition
+    mpirun -np $N ./build/test_mpi_spmv
+    mpirun -np $N ./build/test_mpi_cg
+done
+```
+
+Run MPI benchmark:
+
+```bash
+mkdir -p results/mpi
+
+# Small test (4 ranks, 5 runs)
+mpirun -np 4 ./build/run_mpi_benchmark 2d 512 5 results/mpi/mpi_p4_2d512.csv 1
+
+# Full correctness and scaling experiments (submit via PBS)
+qsub scripts/vanda/test_mpi_correctness.pbs
+qsub scripts/vanda/benchmark_mpi_scaling.pbs
+qsub scripts/vanda/benchmark_mpi_scaling_1024.pbs
+```
+
+```text
+mpirun -n <P> ./build/run_mpi_benchmark \
+  <2d|3d|thermal2> <n|matrix.mtx> <repeats> <output.csv> [warmups]
+```
 
 ## 9. Benchmarking Methodology and Task 1 Results
 
@@ -422,7 +520,7 @@ Development uses Git feature branches and direct integration into `main` for com
 4. Review source diff, documentation, numerical outputs and ignored artifacts.
 5. Commit and push the branch; integrate into `main` after checking the updated base branch and reviewing the changes.
 
-**Task A is complete and integrated.** Task 1 serial CG was previously merged into `main` (`9c7648e`). Task 2 CPU OpenMP CG, its correctness tests, benchmark runners, consolidated evidence, figures, and the Person A report were subsequently merged **directly into `main`** by fast-forward merge and pushed to GitHub (latest commit `c35e9d8`, 21 October 2026). No pull request was used. MPI and hybrid integration will be handled separately by teammates.
+**Task A is complete and integrated.** Task 1 serial CG was previously merged into `main` (`9c7648e`). Task 2 CPU OpenMP CG, its correctness tests, benchmark runners, consolidated evidence, figures, and the Person A report were subsequently merged **directly into `main`** by fast-forward merge and pushed to GitHub (latest commit `c35e9d8`, 21 October 2026). No pull request was used. Person B's MPI implementation and scaling evidence are documented separately; hybrid MPI/OpenMP integration remains a team task led by Person C.
 
 Git ignores build outputs, downloaded matrices (`data/*`) and generated benchmark results (`results/*`) by default. Select representative small CSVs for version control explicitly, for example:
 
@@ -439,7 +537,7 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 5. Davis, T. A., and Hu, Y. (2011). *The University of Florida Sparse Matrix Collection.*
 6. SuiteSparse Matrix Collection, `Schmid/thermal2`: https://sparse.tamu.edu/Schmid/thermal2
 
-## 12. Current Project Status (21 October 2026)
+## 12. Current Project Status (24 October 2026)
 
 | Workstream | Status / evidence |
 |---|---|
@@ -451,7 +549,7 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 | Task 2 scaling and scheduling | 512² and 1024² **180/180** strong-scaling measurements converged; scheduling **140/140** converged |
 | Task 2 final build | **7/7 CTest tests passed** on CN-006, PBS job `1471910`, 21 Oct 2026 |
 | Task A — Person A completion and integration | **COMPLETED**: Task 1 + Task 2, benchmarks, figures, README and `REPORT_TASK_A.md` merged directly into `main` (`c35e9d8`); no PR required |
-| MPI / hybrid | Team integration handled separately; completion not verified by Person A evidence |
+| MPI / hybrid | **Person B MPI complete (October 2026)**: row-partitioned MPI CG, distributed SpMV/dot, collective-safe solver, 10/10 CTest, MPI tests at 1/2/4 ranks, 512² and 1024² scaling (80/80 converged runs per size), PBS scripts, `REPORT_TASK_B.md`; hybrid remains Person C's work |
 | OpenMP GPU offload | **Optional extension if time permits**; not implemented or benchmarked; outside completed Task A scope |
 
 Full Person A reporting and evidence: [REPORT_TASK_A.md](REPORT_TASK_A.md).

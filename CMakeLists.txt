@@ -22,6 +22,25 @@ target_compile_features(cg_common INTERFACE cxx_std_17)
 # OpenMP support for CPU parallel implementations.
 find_package(OpenMP REQUIRED COMPONENTS CXX)
 
+# Optional MPI support. Enable with -DCG_ENABLE_MPI=ON.
+# MPI targets are added only when the library is found.
+# Disabling MPI (or an unavailable MPI library) does not affect
+# Serial or OpenMP builds.
+option(CG_ENABLE_MPI "Build the distributed-memory MPI CG solver" ON)
+
+if(CG_ENABLE_MPI)
+    find_package(MPI COMPONENTS CXX)
+    if(MPI_CXX_FOUND)
+        message(STATUS "MPI found: ${MPI_CXX_COMPILER}")
+        set(CG_MPI_AVAILABLE TRUE)
+    else()
+        message(STATUS "MPI not found; MPI targets will be skipped")
+        set(CG_MPI_AVAILABLE FALSE)
+    endif()
+else()
+    set(CG_MPI_AVAILABLE FALSE)
+endif()
+
 # Solver targets will be added in their respective tasks:
 # - cg_serial
 # - cg_openmp
@@ -130,6 +149,48 @@ target_link_libraries(run_openmp_benchmark PRIVATE
 
 include(CTest)
 
+# MPI solver and benchmark library targets.
+# Only added when MPI is found and enabled.
+if(CG_MPI_AVAILABLE)
+
+    # MPI numerical operations: partitioning, distributed SpMV, dot products.
+    # Modular design allows reuse by hybrid MPI+OpenMP solver (Person C).
+    add_library(cg_mpi_ops STATIC
+        src/mpi/mpi_partition.cpp
+        src/mpi/mpi_ops.cpp
+    )
+    target_link_libraries(cg_mpi_ops PUBLIC
+        cg_common
+        MPI::MPI_CXX
+    )
+
+    # MPI CG solver. Depends only on mpi_ops.
+    add_library(cg_mpi STATIC
+        src/mpi/mpi_solver.cpp
+    )
+    target_link_libraries(cg_mpi PUBLIC cg_mpi_ops)
+
+    # MPI benchmark harness: timing, CSV output, warmup protocol.
+    add_library(cg_mpi_benchmark STATIC
+        src/mpi/benchmark_mpi.cpp
+        src/mpi/benchmark_mpi_csv.cpp
+    )
+    target_link_libraries(cg_mpi_benchmark PUBLIC cg_mpi)
+
+    # Command-line MPI CG benchmark runner.
+    add_executable(run_mpi_benchmark
+        src/mpi/run_mpi_benchmark.cpp
+    )
+    target_link_libraries(run_mpi_benchmark PRIVATE
+        cg_mpi_benchmark
+        cg_poisson
+        cg_matrix_market
+    )
+
+    message(STATUS "MPI CG targets: cg_mpi_ops, cg_mpi, cg_mpi_benchmark, run_mpi_benchmark")
+
+endif()
+
 if(BUILD_TESTING)
     add_executable(test_csr tests/test_csr.cpp)
     target_link_libraries(test_csr PRIVATE cg_common)
@@ -199,4 +260,58 @@ if(BUILD_TESTING)
         NAME matrix_market
         COMMAND test_matrix_market
     )
+
+    # MPI tests require MPI library and mpiexec launcher.
+    # Each test is run with 4 MPI ranks to verify distributed correctness.
+    if(CG_MPI_AVAILABLE)
+        # MPI partition correctness: row distribution and gather/scatter
+        add_executable(test_mpi_partition
+            tests/test_mpi_partition.cpp
+        )
+        target_link_libraries(test_mpi_partition PRIVATE
+            cg_mpi_ops
+            cg_poisson
+        )
+        add_test(
+            NAME mpi_partition
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 4
+                    ${MPIEXEC_PREFLAGS}
+                    $<TARGET_FILE:test_mpi_partition>
+                    ${MPIEXEC_POSTFLAGS}
+        )
+
+        # MPI SpMV correctness: compare distributed vs serial result
+        add_executable(test_mpi_spmv
+            tests/test_mpi_spmv.cpp
+        )
+        target_link_libraries(test_mpi_spmv PRIVATE
+            cg_mpi_ops
+            cg_ops
+            cg_poisson
+        )
+        add_test(
+            NAME mpi_spmv
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 4
+                    ${MPIEXEC_PREFLAGS}
+                    $<TARGET_FILE:test_mpi_spmv>
+                    ${MPIEXEC_POSTFLAGS}
+        )
+
+        # MPI CG correctness: convergence and cross-rank consistency
+        add_executable(test_mpi_cg
+            tests/test_mpi_cg.cpp
+        )
+        target_link_libraries(test_mpi_cg PRIVATE
+            cg_mpi
+            cg_serial
+            cg_poisson
+        )
+        add_test(
+            NAME mpi_cg
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 4
+                    ${MPIEXEC_PREFLAGS}
+                    $<TARGET_FILE:test_mpi_cg>
+                    ${MPIEXEC_POSTFLAGS}
+        )
+    endif()
 endif()
