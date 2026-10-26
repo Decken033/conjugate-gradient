@@ -1,32 +1,49 @@
 # DSA5208 — Person B Technical Report: Distributed-Memory MPI Conjugate Gradient
 
 - **Scope:** MPI CG implementation, correctness verification, and strong scaling
-- **Evidence date:** 24 October 2026
-- **Status:** Implementation, Vanda tests, and both scaling campaigns completed
+- **Evidence:** Poisson and correctness jobs dated 24 October 2026; thermal2 PBS job `1495684.stdct-mgmt-02`; final local audit 26 October 2026
+- **Status:** Implementation, Vanda tests, two Poisson campaigns, and one thermal2 campaign completed
 
 ## Abstract
 
-Person B implemented a C++17, double-precision, unpreconditioned distributed-memory Conjugate Gradient (CG) solver on row-partitioned CSR matrices. Distributed sparse matrix-vector multiplication (SpMV) uses `MPI_Allgatherv`, dot products use `MPI_Allreduce`, and convergence is verified with the distributed true residual. MPI libraries, a benchmark runner, three test executables, and PBS jobs integrate into the existing CMake project. The latest Vanda correctness job passed 10/10 CTest targets and all MPI test executables at one, two, and four ranks. Two 2D Poisson scaling jobs each produced 80/80 converged timed runs over eight rank settings. Mean solver-time speedup peaks at 16 ranks (2.8391× for 512×512, 3.4184× for 1024×1024) and reverses at higher ranks.
+Person B implemented a C++17, double-precision, unpreconditioned distributed-memory Conjugate Gradient (CG) solver on row-partitioned CSR matrices. Distributed sparse matrix-vector multiplication (SpMV) uses `MPI_Allgatherv`, dot products use `MPI_Allreduce`, and convergence is verified with the distributed true residual. MPI libraries, a benchmark runner, three test executables, and PBS jobs integrate into the existing CMake project. The latest Vanda correctness job passed 10/10 CTest targets and all MPI test executables at one, two, and four ranks. Two 2D Poisson scaling jobs each produced 80/80 converged timed runs over eight rank settings. Mean solver-time speedup peaks at 16 ranks (2.8391× for 512×512, 3.4184× for 1024×1024) and reverses at higher ranks. A separate real-world SuiteSparse `thermal2` campaign produced 50/50 converged timed runs at 1, 2, 4, 8, and 16 ranks; its best mean solve time is 25.690135 s at eight ranks (3.4458× versus MPI one rank).
 
 ## 1. Objectives, Scope, and Deliverables
 
 Task B covers CSR row partitioning and vector scatter/gather; distributed SpMV, dot product, and local vector updates; unpreconditioned MPI CG with true-residual verification; MPI CMake targets, correctness tests, CSV benchmarking, and Vanda PBS jobs. The shared Poisson generators already exist in common project code and are reused here; this report does not claim their authorship or Person A's Serial/OpenMP results. The modular `cg_mpi_ops` library can be reused by a hybrid solver, but no hybrid implementation is claimed as a Task B deliverable.
 
-Key files are `include/mpi_partition.hpp`, `include/mpi_ops.hpp`, `include/mpi_solver.hpp`, `include/mpi_benchmark.hpp`, `src/mpi/*.cpp`, `tests/test_mpi_{partition,spmv,cg}.cpp`, MPI sections of `CMakeLists.txt`, and the three PBS scripts in `scripts/vanda/` for tests and the two scaling campaigns.
+Key files are `include/mpi_partition.hpp`, `include/mpi_ops.hpp`, `include/mpi_solver.hpp`, `include/mpi_benchmark.hpp`, `src/mpi/*.cpp`, `tests/test_mpi_{partition,spmv,cg}.cpp`, MPI sections of `CMakeLists.txt`, and the PBS scripts in `scripts/vanda/` for tests and scaling campaigns.
 
 ## 2. Implementation
 
 ### 2.1 CSR row partitioning
 
-For N matrix rows and P ranks, `rows_per_rank = ceil(N/P)` and rank r owns `[min(r × rows_per_rank, N), min((r+1) × rows_per_rank, N))`. Rank 0 validates the square input, broadcasts dimensions, extracts CSR row blocks, and sends remote blocks. Local `row_ptr` is rebased to zero; `col_idx` keeps global indices. The partition stores global dimensions and offsets. Scatter/gather utilities support vectors and validation. P > N is rejected. Rank 0 holds the full matrix during distribution, which is outside the timed solve.
+For N matrix rows and P ranks, `rows_per_rank = ceil(N/P)` and rank r owns `[min(r × rows_per_rank, N), min((r+1) × rows_per_rank, N))`. Rank 0 validates the square input, broadcasts dimensions with `MPI_Bcast`, extracts CSR row blocks, and distributes them with `MPI_Send`/`MPI_Recv`. Local `row_ptr` is rebased to zero; `col_idx` keeps global indices. The partition stores global dimensions and offsets. The vector utilities use `MPI_Scatterv` and `MPI_Gatherv` in tests; the benchmark instead constructs its RHS locally through distributed SpMV and does not gather the final solution. P > N is rejected. Distribution is outside the timed solve, but the runner retains rank 0's full input matrix throughout benchmarking, in addition to its local block.
 
 ### 2.2 Distributed operations
 
 `mpi_csr_matvec` computes Allgatherv counts and displacements from the row offsets, replicates x on every rank, and evaluates local CSR rows. The replicated vector consumes O(N) doubles per rank; vector communication is O(N) per rank per SpMV as an order-of-magnitude description, with actual network traffic dependent on the collective. `mpi_dot` sums local products and calls `MPI_Allreduce(MPI_SUM)`; `mpi_norm2` uses this dot product. Local vector updates complete the recurrence. Allgatherv uses `int` count/displacement arguments, limiting very large cases without additional handling. Sparse halo exchange, communication overlap, and OpenMP local parallelism are not implemented in this MPI variant.
 
+The persistent solution, RHS, residual, and direction vectors contain only local row entries. A full input vector is allocated temporarily inside each SpMV. Local arithmetic per ordinary iteration costs O(NNZ_r + N_r), where NNZ_r and N_r are the local nonzeros and rows; communication time is additional. Local CSR and solver storage cost O(NNZ_r + N_r + N + P), with the additional full input CSR on rank 0. Blocking collectives require participation and data dependencies across ranks; they are not explicit barriers. The benchmark's pre-timing `MPI_Barrier` and post-timing `MPI_Reduce(MPI_MAX)` are outside the solver timer.
+
 ### 2.3 CG solver
 
-The zero initial guess gives initial residual and direction equal to b. Each iteration computes `Ap`, `pᵀAp`, the step length, solution and recursive residual updates, and a new direction. Globally reduced scalars make convergence and breakdown decisions common to all ranks. Once the recursive relative residual reaches the tolerance, the solver forms `b − Ax` with distributed SpMV, checks its global norm, and restarts from the true residual if necessary. It checks invalid numerical quantities collectively and reports a true residual at the iteration limit. Benchmarks use tolerance `1e-8`, at most 10,000 iterations, and manufactured `x* = ones`, `b = Ax*`. The tests below cover exercised matrices and rank counts, not arbitrary SPD systems formally.
+Standard unpreconditioned CG solves $Ax=b$ for a real symmetric positive definite (SPD) matrix: $A=A^T$ and $v^TAv>0$ for every nonzero $v$. The generated Dirichlet Poisson stencils satisfy this requirement. CSR validation checks square shape and storage, not symmetry or positive definiteness of arbitrary imported inputs. The symmetric thermal2 file reconstructs a symmetric matrix, but neither its SPD property nor its condition number was independently established in this audit; successful runs for the manufactured RHS do not prove SPD.
+
+The implementation uses $x_0=0$, $r_0=b-Ax_0=b$, and $p_0=r_0$. With $\rho_k=r_k^Tr_k$, ordinary iterations use
+
+$$
+q_k=Ap_k,\qquad \alpha_k=\frac{\rho_k}{p_k^Tq_k},\qquad
+x_{k+1}=x_k+\alpha_kp_k,\qquad r_{k+1}=r_k-\alpha_kq_k,
+$$
+
+$$
+\rho_{k+1}=r_{k+1}^Tr_{k+1},\qquad
+\beta_k=\frac{\rho_{k+1}}{\rho_k},\qquad
+p_{k+1}=r_{k+1}+\beta_kp_k.
+$$
+
+Globally reduced scalars make convergence and breakdown decisions common to all ranks; the solver does not broadcast separate decision flags. Once $\sqrt{\rho_{k+1}}/\lVert b\rVert_2$ reaches the tolerance, it forms the true residual $b-Ax_{k+1}$ with an additional distributed SpMV and accepts convergence only if $\lVert b-Ax_{k+1}\rVert_2/\lVert b\rVert_2\leq 10^{-8}$. Otherwise it replaces the residual and restarts the direction from that true residual, an implementation safeguard beyond the ordinary recurrence. A zero RHS returns the exact zero solution with reported residual zero. Nonpositive `pᵀAp` and several nonfinite scalar quantities trigger breakdown checks; a true residual is also reported at the iteration limit. Benchmarks allow at most 10,000 iterations and manufacture `x* = ones`, `b = Ax*`. The solution-error metric is $\lVert x-x^*\rVert_2/\lVert x^*\rVert_2$, distinct from the stopping residual. Double precision, true-residual verification, and restarts reduce residual-drift risk but do not guarantee accuracy for all conditioning or numerical ranges.
 
 ## 3. Build and Correctness Verification
 
@@ -38,23 +55,35 @@ The latest correctness job (PBS `1482726.stdct-mgmt-02`, CN-152, 24 October 2026
 | `test_mpi_spmv` | Distributed versus serial SpMV on 2D 16×16, 2D 32×32, 3D 8×8×8; ones and zero vectors; dot product and norm | 1, 2, 4 passed |
 | `test_mpi_cg` | 2D 8×8, 16×16, 32×32; 3D 4³ and 8³; one-rank serial comparison; 16×16 and 32×32 solution checks across separately run rank counts; 81-row case | 1, 2, 4 passed |
 
-CG assertions include convergence, true relative residual at most `1e-8`, and small manufactured-solution error on these test matrices. The routines labelled “cross-rank consistency” check each run against the known solution; they do not directly compare solution vectors from different jobs. Earlier retained jobs contain build/test and launch failures, followed by successful reruns. They are historical troubleshooting records, not the latest verification verdict.
+CG checks include convergence, true relative residual at most `1e-8`, and manufactured relative solution error below `1e-4` in the 2D/3D solution tests. The SpMV serial comparisons use `|a-b| <= 1e-9*(1+|a|+|b|)`; the one-rank CG comparison uses the same mixed absolute/relative form with `1e-12`, and requires matching iteration counts. MPI tests use a custom `CHECK` that calls `MPI_Abort` on failure and remains active in Release. The routines labelled “cross-rank consistency” check each run against the known solution; they do not directly compare solution vectors from different jobs. Earlier retained jobs contain build/test and launch failures, followed by successful reruns. They are historical troubleshooting records, not the latest verification verdict.
+
+`CMakeLists.txt` requires C++17, CMake 3.20 or later, and OpenMP even for this project's MPI build. MPI targets are conditional on `CG_ENABLE_MPI` and a found C++ MPI library; `cg_mpi_ops` links `MPI::MPI_CXX`, `cg_mpi` adds the solver, and `cg_mpi_benchmark` adds timing/CSV output. `run_mpi_benchmark` also links the shared Poisson generator and Matrix Market loader. CTest registers the three MPI tests with four processes. Its default `matrix_market` test uses small fixtures, not the optional full thermal2 integration test.
 
 ## 4. Experimental Setup and Data Audit
 
-The workloads are 2D Poisson 512×512 (N = 262,144; NNZ = 1,308,672) and 1024×1024 (N = 1,048,576; NNZ = 5,238,784). Each uses P = 1, 2, 4, 8, 16, 32, 36, 72, four untimed warmups, and ten timed repetitions per P. The selected jobs are `1482451.stdct-mgmt-02` and `1482491.stdct-mgmt-02`, respectively. Both allocate two nodes, 36 MPI slots per node, and run `--map-by slot --bind-to core`; the 512 job requests 32 GB per node, the 1024 job 64 GB. Both benchmark logs load `CMake/3.27.6-GCCcore-13.2.0` and `OpenMPI/4.1.6-GCC-13.2.0`, and report GCC 13.2.0. The 1024 log identifies Intel Xeon Platinum 8452Y nodes CN-093/CN-094. The 512 log identifies GN-A40-048/GN-A40-050 but does not establish the CPU model. The correctness script names a 4.1.8 MPI module, while that job's CMake output resolves a 4.1.6 MPI compiler; the benchmark logs independently establish 4.1.6 for both scaling jobs.
+The workloads are 2D Poisson 512×512 (N = 262,144; NNZ = 1,308,672) and 1024×1024 (N = 1,048,576; NNZ = 5,238,784). Each uses P = 1, 2, 4, 8, 16, 32, 36, 72, four untimed warmups, and ten timed repetitions per P. The selected jobs are `1482451.stdct-mgmt-02` and `1482491.stdct-mgmt-02`, respectively. Both scripts request two nodes, 36 MPI slots per node, and `--map-by slot --bind-to core`; the 512 job requests 32 GB per node, the 1024 job 64 GB. Both benchmark logs show `CMake/3.27.6-GCCcore-13.2.0` and `OpenMPI/4.1.6-GCC-13.2.0` loaded. The 1024 log also prints GCC 13.2.0, lists nodes CN-093/CN-094, and reports Intel Xeon Platinum 8452Y on the launch host CN-093. The 512 log lists GN-A40-048/GN-A40-050 but does not print a compiler version or CPU model; GCC 13.2.0 is identified by the loaded toolchain module. Allocation and launch options are documented, but none of these logs contains a process-to-node mapping. The correctness script names a 4.1.8 MPI module, while that job's CMake output resolves a 4.1.6 MPI compiler; the benchmark logs independently establish the OpenMPI 4.1.6 environment for both scaling jobs.
 
 The CSV field `solve_seconds` is the maximum rank elapsed time in seconds. After a barrier, `MPI_Wtime` surrounds `solve_mpi_cg`; `MPI_Reduce(MPI_MAX)` selects the slowest rank. Timed work includes local computation and solver collectives. Matrix generation, partitioning, RHS formation, warmups, post-solve solution-error calculation, and CSV writing are excluded. The CSV has no communication-only or total-job timing. `true_relative_residual` and `relative_solution_error` are dimensionless; `iterations` counts CG iterations.
 
 The audit selected only `results/mpi/mpi_2d512_p<P>_1482451.stdct-mgmt-02.csv` and `results/mpi/mpi_2d1024_p<P>_1482491.stdct-mgmt-02.csv`. All 16 files have the expected 12 columns, exactly ten rows with run indices 0–9 once each, complete fields, finite positive solver times, consistent size/rank/NNZ metadata, `solver=mpi`, and `threads=1`. No selected run is missing or duplicated. Other validation files and earlier/partial 512 attempts in the directory are separate experiments and excluded. All selected rows have `converged=1`: **80/80 for each size, 160/160 overall**. Iterations are 894 for every 512 row and 1,755 for every 1024 row. Maximum true relative residuals are about `9.5261e-09` and `9.8021e-09`, below `1e-8`; maximum relative solution errors are about `2.2112e-08` and `4.8189e-08`.
 
+The additional `thermal2` input is the SuiteSparse `Schmid/thermal2` unstructured finite-element steady-state thermal matrix, as described in its local Matrix Market header. Symmetric coordinate storage is expanded to CSR (N = 1,228,045; NNZ = 8,580,313); the loader mirrors off-diagonal entries and combines duplicates. As in Person A's experiment, the benchmark **does not use** the supplied `thermal2_b.mtx`; it constructs `x* = ones` and `b = Ax*` to make solution error measurable. The `benchmark_mpi_thermal2.pbs` script requests two nodes with 36 CPUs, 36 MPI slots, and 64 GB per node (72 CPU task slots in total), with an eight-hour walltime limit. These allocated resources and the walltime limit are distinct from the 1–16 launched processes and solver-only timings. Two allocated nodes and PBS `Exit_status: 0` are supplied experiment context; no scheduler accounting record is retained in the execution log.
+
+The retained log `results/mpi/thermal2/dsa5208_mpi_thermal2.o1495684` confirms loading the CMake/GCC 13.2.0 and OpenMPI 4.1.6 modules, MPI discovery through the 4.1.6 `mpicxx` path, successful configuration/build through `run_mpi_benchmark`, and sequential configurations P = 1, 2, 4, 8, 16. Release is requested by the current script; the log does not echo the build-type flag or archive a CMake cache. Each configuration reports the matching matrix dimensions and communicator size, four warmups, ten measured runs, its corresponding CSV path, and `Converged: 10/10`. Thus `10` and `4` are repetitions and warmups, respectively, as confirmed by the runner's argument parser. All five logged medians match the CSV medians at the log's display precision. Logged iterations and residuals are from the first record of each group, not aggregate statistics; all rows were independently checked.
+
+Before each launch, OpenMPI reports that `mca_plm_tm` and `mca_ras_tm` cannot load `libpbs.so.0`, explicitly marked `(ignored)`: ten component warnings in total. No fatal application error, abort, or nonconvergence message appears; all five configurations reach their CSV output and summaries, including 16 ranks. The warnings do not establish their performance impact or the fallback launcher. The `CN-115` prefixes identify the warning-emitting host, not a map of solver processes. No rank-to-node or binding record is present, so placement across one or both nodes is unverified.
+
+There is a historical script discrepancy: the log loads `data/thermal2/thermal2.mtx`, whereas the current PBS script sets `MATRIX="data/suitesparse/thermal2/thermal2.mtx"`. The current script is therefore a reproduction recipe, not a byte-for-byte archive of the submitted script. The recorded matrix dimensions, rank sequence, output filenames, warmups, and repeat counts agree with the CSVs and current code.
+
+The five selected `results/mpi/thermal2/thermal2_p<P>_1495684.stdct-mgmt-02.csv` files each contain ten per-run measurements, rather than a summary row or mixed configurations. Their header is `solver,matrix_name,n,nnz,ranks,threads,run_index,iterations,converged,solve_seconds,true_relative_residual,relative_solution_error`. All 50 rows have complete fields, run indices 0–9 once per file, matching matrix metadata and rank counts, `solver=mpi`, `threads=1`, and finite positive solve times. All 50 have `converged=1` and true relative residual below `1e-8`. The CSV records the **relative** true residual and relative solution error, not an absolute final residual norm. A zero PBS exit status by itself would not establish these numerical checks.
+
 ## 5. Statistics and Scaling Results
 
-`T(P)` is the arithmetic mean of the ten `solve_seconds` values. SD is the sample standard deviation (denominator 9). `Speedup(P) = T(1)/T(P)` and `Efficiency(P) = Speedup(P)/P` use only the same matrix and timing field. Ratios were computed before display rounding. Min–max is the observed timed-run range. No serial/OpenMP baseline is included.
+`T(P)` is the arithmetic mean of the ten `solve_seconds` values. SD is the sample standard deviation (denominator 9). `Speedup(P) = T(1)/T(P)` and efficiency fraction `E(P) = Speedup(P)/P` use only the same matrix and timing field; percentage efficiency is `100*E(P)`. Sections 5.1–5.2 show fractions and Section 5.4 shows percentages, explicitly labelled below. Ratios were computed before display rounding. Min–max is the observed timed-run range. No serial/OpenMP baseline is included.
 
 ### 5.1 512×512 2D Poisson — job 1482451
 
-| Ranks | Converged/runs | Mean s | SD s | Min–max s | Speedup | Efficiency | Iterations |
+| Ranks | Converged/runs | Mean s | SD s | Min–max s | Speedup | Efficiency (fraction) | Iterations |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | 10/10 | 1.803076 | 0.001980 | 1.801473–1.806533 | 1.0000 | 1.0000 | 894 |
 | 2 | 10/10 | 1.494327 | 0.044425 | 1.464502–1.618214 | 1.2066 | 0.6033 | 894 |
@@ -67,7 +96,7 @@ The audit selected only `results/mpi/mpi_2d512_p<P>_1482451.stdct-mgmt-02.csv` a
 
 ### 5.2 1024×1024 2D Poisson — job 1482491
 
-| Ranks | Converged/runs | Mean s | SD s | Min–max s | Speedup | Efficiency | Iterations |
+| Ranks | Converged/runs | Mean s | SD s | Min–max s | Speedup | Efficiency (fraction) | Iterations |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | 10/10 | 29.194377 | 0.038686 | 29.133957–29.260419 | 1.0000 | 1.0000 | 1,755 |
 | 2 | 10/10 | 15.122517 | 0.014858 | 15.102769–15.140765 | 1.9305 | 0.9653 | 1,755 |
@@ -82,7 +111,27 @@ The audit selected only `results/mpi/mpi_2d512_p<P>_1482451.stdct-mgmt-02.csv` a
 
 ![MPI strong-scaling speedup and efficiency for 512×512 and 1024×1024 2D Poisson matrices](docs/task_b/mpi_scaling.svg)
 
-**Figure 1.** Speedup (solid lines, left panel) is normalized to the mean one-rank `solve_seconds` for the same matrix. Efficiency (dashed lines, right panel) is speedup divided by rank count. Each point uses the arithmetic mean of ten converged timed runs; rank counts are shown on the horizontal axes.
+**Figure 1.** Speedup (solid lines, left panel) is normalized to the mean one-rank `solve_seconds` for the same matrix. Efficiency (dashed lines, right panel) is speedup divided by rank count, displayed as a percentage. Each point uses the arithmetic mean of ten converged timed runs. All three figures place the tested rank settings at equally spaced categorical positions; horizontal distances do not represent proportional changes in rank count.
+
+### 5.4 SuiteSparse thermal2 — job 1495684
+
+The same `T(P)`, sample SD, speedup, and efficiency definitions apply. Here `T(1)` is **MPI with one rank**, not a separately measured serial solver. The min–max and median columns describe the ten individual `solve_seconds` values in each file. Residual and solution-error columns report maxima over each configuration's ten runs; iteration counts are constant within each configuration.
+
+| Ranks | Converged/runs | Mean s | SD s | Median s | Min–max s | Speedup | Efficiency (%) | Iterations | Max. true relative residual | Max. relative solution error |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 10/10 | 88.523455 | 0.253923 | 88.526741 | 88.175257–89.022706 | 1.0000 | 100.00% | 4,333 | 9.860597e-09 | 4.412101e-07 |
+| 2 | 10/10 | 45.098825 | 0.268347 | 45.098867 | 44.764948–45.386621 | 1.9629 | 98.14% | 4,333 | 9.843217e-09 | 4.410869e-07 |
+| 4 | 10/10 | 31.069230 | 0.143527 | 31.098854 | 30.771459–31.217149 | 2.8492 | 71.23% | 4,332 | 9.965738e-09 | 4.418496e-07 |
+| 8 | 10/10 | **25.690135** | 0.008274 | 25.691592 | 25.678339–25.701494 | **3.4458** | 43.07% | 4,331 | 9.986189e-09 | 4.429738e-07 |
+| 16 | 10/10 | 28.187397 | 0.014522 | 28.182656 | 28.163636–28.209606 | 3.1405 | 19.63% | 4,332 | 9.937960e-09 | 4.412162e-07 |
+
+![Thermal2 MPI mean solver time, speedup, and parallel efficiency](docs/task_b/mpi_thermal2_scaling.svg)
+
+**Figure 2.** Mean slowest-rank solver time with sample-SD bars, measured speedup against the MPI one-rank mean and ideal linear speedup, and parallel efficiency. Ideal time is `T(1)/P`. The bars are small relative to the time-axis range; the exact SD values are in the table. Matrix loading, distribution, RHS construction, warmups, accuracy calculation, and CSV output are excluded from `solve_seconds`.
+
+![Within-job MPI speedup for thermal2 and two Poisson matrices](docs/task_b/mpi_thermal2_comparison.svg)
+
+**Figure 3.** Each matrix's mean solver time is normalized to its **own MPI one-rank run**. Only common rank counts 1–16 are shown. This permits comparison of scaling ratios but does not make absolute runtimes or hardware conditions equivalent across jobs.
 
 ## 6. Performance Analysis
 
@@ -90,13 +139,23 @@ Both sizes improve through 16 ranks in mean solver time, but scaling is not clos
 
 Figure 1 makes the shared trend visible: both speedup curves peak at 16 ranks, then fall, while efficiency declines as ranks increase. The 1024×1024 case retains more useful scaling through 16 ranks than the 512×512 case, but neither maintains the gain at 32 or 36 ranks. At 72 ranks both speedups fall below 1, so adding ranks is slower than the corresponding one-rank run.
 
-Mean time rises beyond 16 ranks. At 72 ranks, the 512 solve takes 3.111284 s (0.5795× one-rank speedup), and the 1024 solve takes 40.043157 s (0.7291×). The scripts can place up to 36 ranks on one node, while 72 spans two nodes. The marked 36-to-72 increase is consistent with cross-node collective cost, but there are no per-collective timings to isolate it. Constant iteration counts and successful true-residual checks rule out iteration-count changes or failed solves as explanations for these timing trends. Row partitioning may give unequal nonzero counts at boundaries, but rank-level workloads and idle time were not measured. The full-vector Allgatherv and repeated reductions are plausible constraints from code inspection, not separately quantified causes.
+Mean time rises beyond 16 ranks. At 72 ranks, the 512 solve takes 3.111284 s (0.5795× one-rank speedup), and the 1024 solve takes 40.043157 s (0.7291×). The Poisson scripts supply a hostfile with 36 slots on each of two nodes and request slot mapping and core binding. This specifies the intended launch policy, but the logs contain no explicit process mapping, so actual node occupancy is not asserted. The 36-to-72 increase is consistent with increased collective and synchronization costs; an inter-node contribution is plausible under the intended policy but unverified. Constant iteration counts and successful true-residual checks rule out iteration-count changes or failed solves as explanations for these timing trends. Row partitioning may give unequal nonzero counts at boundaries, but rank-level workloads and idle time were not measured. The full-vector Allgatherv and repeated reductions are plausible constraints from code inspection, not separately quantified causes.
+
+For `thermal2`, mean solve time drops from 88.523455 s at one rank to 25.690135 s at eight ranks, then rises to 28.187397 s at 16 ranks (9.72% above the eight-rank mean). Eight ranks gives the best observed execution time and 3.4458× speedup, far below the ideal 8×. Excluding the one-rank baseline, two ranks give the highest efficiency at 98.14%; efficiency falls to 43.07% at eight and 19.63% at 16. Every run converged below the `1e-8` true relative-residual tolerance. Iterations vary from 4,331 to 4,333 across ranks: 16 ranks requires one more iteration than eight ranks (4,332 versus 4,331, a 0.023% increase). That difference alone is far smaller than the 9.72% runtime increase under an equal-cost-per-iteration comparison; it does not fully control work because residual-check/restart counts were not logged. The relative solution errors are near `4.4e-07` for every configuration. Minor iteration and residual differences are compatible with different floating-point reduction orders; their precise cause is not measured.
+
+At common rank counts, `thermal2` has higher speedup than both Poisson cases at eight ranks (3.4458× versus 2.7829× and 3.3934×), but at 16 ranks its 3.1405× lies between their 2.8391× and 3.4184×. These are descriptive sample-mean comparisons, not statistical significance claims. The `thermal2` curve peaks at eight ranks within its tested range, whereas both Poisson sample means continue improving to 16 before declining at higher counts. The Poisson matrices come from regular five-point stencils with roughly five nonzeros per row; `thermal2` is an unstructured finite-element matrix with about 6.99 nonzeros per row on average and requires substantially more iterations than either Poisson case. Its rowwise nonzero distribution and off-rank dependencies were not profiled in the experiment. Distinct sparsity patterns can change local SpMV work and memory access, but this implementation always gathers the full N-entry input vector regardless of sparsity. The data do not isolate which factor produced the different curve. The jobs were separate and actual rank placement is unknown, so this is a comparison of within-job ratios, not a controlled matrix-only comparison.
+
+Each CG iteration calls distributed SpMV with a full-vector `MPI_Allgatherv` and multiple scalar `MPI_Allreduce` operations. As local row counts shrink, those collectives and synchronization can take a larger fraction of solver time; row-count partitioning could also leave unequal nonzero work. These are source-level explanations consistent with sublinear speedup and the 16-rank regression. The CSV has no collective timings, per-rank work measurements, or placement record, so neither communication overhead nor load imbalance was quantified and no cross-node effect can be assigned.
 
 ## 7. Limitations and Discussion
 
 Evidence covers two structured Poisson matrices, one successful job per size, and ten sequential timed repetitions per rank setting. Within-job SD does not measure between-job, node, or placement variation. The 1024 eight-rank minimum, 8.219117 s, is below the other measurements and raises its SD; this valid record is retained. The 512 two-rank setting also varies more than adjacent configurations. Jobs run rank settings in ascending order, leaving time-dependent cluster effects possible. The 512 CPU model is not established in its retained log, so absolute cross-job times are not treated as a controlled hardware comparison.
 
-The solver replicates a full vector per rank, uses `int` Allgatherv counts/displacements, and has no halo exchange, overlap, or communication-only profiling. The correctness suite exercises representative paths at one, two, and four ranks; the large experiments additionally show convergence to 72 ranks for their two matrices. Neither provides formal proof for arbitrary sparse inputs. 
+The `thermal2` evidence adds one completed benchmark campaign with five sequential rank configurations and ten timed repetitions each, supported by its execution log and all five CSVs. Module loading and build completion are recorded, and `CN-115` appears in launcher warnings, but process mapping, CPU model, total job time, and scheduler exit status are not recorded there. PBS `Exit_status: 0` remains user-supplied context. The two-node resource request and maximum 16 ranks do not prove either single-node or multi-node execution. Sample SD describes within-configuration repeats only, not independent job or node variability. These results exclude matrix loading and distribution, so they characterize solver strong scaling rather than end-to-end application runtime. No saved thermal2 solution vectors or independent reference-solver run for this MPI campaign are available; validation uses the known manufactured solution and distributed true residual.
+
+The solver replicates a full vector per rank, uses `int` Allgatherv counts/displacements, and has no halo exchange, overlap, or communication-only profiling. The correctness suite exercises representative paths at one, two, and four ranks; the large experiments additionally show convergence to 72 ranks for their two matrices. The thermal2 CSVs show convergence through 16 ranks. Neither provides formal proof for arbitrary sparse inputs.
+
+Additional source-level limits matter outside the exercised cases. `std::size_t` metadata is sent as `MPI_UNSIGNED_LONG`, consistent with the intended LP64 Linux environment but not portable to every ABI. The ceil-block rule can leave trailing empty ranks even when P <= N (for example N = 5, P = 4); the benchmark's conditional solution-error reduction is unsafe when some ranks have zero local entries. All reviewed experiments have nonempty partitions. Solver scalar checks are collective, but some partition/loader failures throw on rank 0 or an individual rank before peers reach collectives; general exception recovery is not demonstrated. The report therefore makes no claim of portable large-count support, safe arbitrary rank counts, or fully collective recovery from every input error.
 
 ## 8. Reproduction and Evidence
 
@@ -106,10 +165,27 @@ From the repository root on Vanda, the recorded workflows are:
 qsub scripts/vanda/test_mpi_correctness.pbs
 qsub scripts/vanda/benchmark_mpi_scaling.pbs
 qsub scripts/vanda/benchmark_mpi_scaling_1024.pbs
+qsub scripts/vanda/benchmark_mpi_thermal2.pbs
 ```
 
 The PBS jobs `1482726.stdct-mgmt-02` (correctness), `1482451.stdct-mgmt-02` (512×512), and `1482491.stdct-mgmt-02` (1024×1024) provide the build, test, and benchmark records. The 16 selected CSVs in `results/mpi/` provide the per-run measurements used in the tables. The scripts record the module, PBS, and cluster-specific path settings needed to reproduce the workflows.
 
+The `thermal2` measurements and execution log are retained in `results/mpi/thermal2/` with job ID `1495684.stdct-mgmt-02`. The logged command loads `data/thermal2/thermal2.mtx`, also the current local coefficient-matrix path. To reproduce with the current PBS script, stage the same dataset at its configured `data/suitesparse/thermal2/thermal2.mtx` path before submission. `thermal2_b.mtx` is not used. Within an allocated Vanda compute environment, the explicit build and a single rank-configuration command are:
+
+```bash
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=ON
+cmake --build build --parallel 8 --target run_mpi_benchmark
+mpirun -np 8 ./build/run_mpi_benchmark thermal2 data/thermal2/thermal2.mtx 10 results/mpi/thermal2/thermal2_p8_reproduction.csv 4
+```
+
+Use a new output filename for each reproduced configuration because the CSV writer truncates existing files. These are reproduction instructions; no new HPC job or solver benchmark was executed during this audit. The current correctness script mixes a 4.1.8 module request with a build cache that historically resolved 4.1.6; reproduce with a consistent MPI compiler, runtime, and fresh build directory. Adapt account/scratch paths in the historical Poisson and correctness scripts. No submitted-script snapshot, binary hash, or historical CMake cache is available to establish the exact source/build provenance of every job.
+
+Run `python scripts/analyze_mpi_thermal2.py` to recompute the thermal2 statistics and regenerate Figures 2 and 3. Run `python scripts/validate_task_b_report.py` to check all 21 selected CSVs, both reports' numerical table rows and shared figures/formulas/commands, the thermal2 execution log, and figure paths. Both scripts resolve input paths relative to the repository. Figure 1 is retained as an audited standalone SVG; its original plotting generator is not available.
+
+Source attribution: the CG formulation follows Y. Saad, *Iterative Methods for Sparse Linear Systems*, second edition, SIAM, 2003 (also cited in `src/common/poisson.cpp`). MPI routine names and semantics follow the [MPI Forum standard](https://www.mpi-forum.org/docs/). Dataset identity and application description come from the header of `data/thermal2/thermal2.mtx`; see the [SuiteSparse Schmid/thermal2 entry](https://sparse.tamu.edu/Schmid/thermal2) and `scripts/download_thermal2.ps1` for the archive URL. Environment statements above use the particular retained job logs, rather than treating the older `docs/ENVIRONMENT.md` as proof of every job's environment. External link availability was not checked during this local audit.
+
 ## 9. Conclusion
 
-Task B's MPI implementation, Vanda build and correctness verification, and both planned Poisson scaling campaigns are complete. The latest CTest is 10/10, every MPI executable passes at one, two, and four ranks, and both experiments have 80/80 converged timed solves. Mean speedup peaks at 16 ranks and reverses at higher counts; 72 ranks is slower than one rank for both matrices. Full-vector Allgatherv and global reductions are credible scaling constraints, while available data do not quantify communication or load imbalance. These conclusions apply to the measured solver-only runs and recorded Vanda conditions.
+Task B's MPI implementation, Vanda build and correctness verification, two Poisson scaling campaigns, and real-world `thermal2` experiment are complete. The latest CTest is 10/10; each Poisson campaign has 80/80 converged timed solves and `thermal2` has 50/50. Poisson mean speedup peaks at 16 ranks, while the measured `thermal2` minimum solve time occurs at eight ranks (3.4458× versus MPI one rank); 16 ranks is slower for `thermal2`. Full-vector Allgatherv and global reductions are credible scaling constraints, but available data do not quantify communication, load imbalance, or the thermal2 job's node placement. These conclusions apply to solver-only timings under the recorded conditions.

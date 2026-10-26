@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="560" viewBox="0 0 1500 560" role="img">
+<title>MPI thermal2 strong scaling: measured solver time</title>
+<rect width="1500" height="560" fill="#ffffff"/>
+<text x="750.00" y="43.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="bold" fill="#253341">MPI thermal2 strong scaling: measured solver time</text>
+<text x="282.33" y="83.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="bold" fill="#253341">Mean solve time</text>
+<line x1="72.00" y1="438.00" x2="492.67" y2="438.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="62.00" y="443.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">0 s</text>
+<line x1="72.00" y1="358.25" x2="492.67" y2="358.25" stroke="#dfe5e8" stroke-width="1"/>
+<text x="62.00" y="363.25" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">25 s</text>
+<line x1="72.00" y1="278.50" x2="492.67" y2="278.50" stroke="#dfe5e8" stroke-width="1"/>
+<text x="62.00" y="283.50" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">50 s</text>
+<line x1="72.00" y1="198.75" x2="492.67" y2="198.75" stroke="#dfe5e8" stroke-width="1"/>
+<text x="62.00" y="203.75" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">75 s</text>
+<line x1="72.00" y1="119.00" x2="492.67" y2="119.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="62.00" y="124.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">100 s</text>
+<line x1="72.00" y1="119.00" x2="72.00" y2="438.00" stroke="#667581" stroke-width="1"/>
+<line x1="72.00" y1="438.00" x2="492.67" y2="438.00" stroke="#667581" stroke-width="1"/>
+<text x="85.00" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">1</text>
+<text x="183.67" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">2</text>
+<text x="282.33" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">4</text>
+<text x="381.00" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">8</text>
+<text x="479.67" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">16</text>
+<text x="282.33" y="493.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="normal" fill="#253341">MPI ranks</text>
+<polyline points="85.00,155.61 183.67,294.13 282.33,338.89 381.00,356.05 479.67,348.08" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="85.00" cy="155.61" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="85.00" y1="154.80" x2="85.00" y2="156.42" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="80.00" y1="154.80" x2="90.00" y2="154.80" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="80.00" y1="156.42" x2="90.00" y2="156.42" stroke="#087e8b" stroke-width="1.5"/>
+<circle cx="183.67" cy="294.13" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="183.67" y1="293.28" x2="183.67" y2="294.99" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="178.67" y1="293.28" x2="188.67" y2="293.28" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="178.67" y1="294.99" x2="188.67" y2="294.99" stroke="#087e8b" stroke-width="1.5"/>
+<circle cx="282.33" cy="338.89" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="282.33" y1="338.43" x2="282.33" y2="339.35" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="277.33" y1="338.43" x2="287.33" y2="338.43" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="277.33" y1="339.35" x2="287.33" y2="339.35" stroke="#087e8b" stroke-width="1.5"/>
+<circle cx="381.00" cy="356.05" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="381.00" y1="356.02" x2="381.00" y2="356.07" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="376.00" y1="356.02" x2="386.00" y2="356.02" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="376.00" y1="356.07" x2="386.00" y2="356.07" stroke="#087e8b" stroke-width="1.5"/>
+<circle cx="479.67" cy="348.08" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="479.67" y1="348.04" x2="479.67" y2="348.13" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="474.67" y1="348.04" x2="484.67" y2="348.04" stroke="#087e8b" stroke-width="1.5"/>
+<line x1="474.67" y1="348.13" x2="484.67" y2="348.13" stroke="#087e8b" stroke-width="1.5"/>
+<polyline points="85.00,155.61 183.67,296.81 282.33,367.40 381.00,402.70 479.67,420.35" fill="none" stroke="#727b83" stroke-width="2.5" stroke-dasharray="7 5"/>
+<line x1="72.00" y1="520.00" x2="95.00" y2="520.00" stroke="#087e8b" stroke-width="3"/>
+<text x="101.00" y="525.00" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">Measured +/- SD</text>
+<line x1="247.00" y1="520.00" x2="270.00" y2="520.00" stroke="#727b83" stroke-width="3" stroke-dasharray="7 5"/>
+<text x="276.00" y="525.00" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">Ideal T(1)/p</text>
+<text x="761.00" y="83.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="bold" fill="#253341">Speedup vs 1 MPI rank</text>
+<line x1="550.67" y1="438.00" x2="971.33" y2="438.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="540.67" y="443.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">0</text>
+<line x1="550.67" y1="358.25" x2="971.33" y2="358.25" stroke="#dfe5e8" stroke-width="1"/>
+<text x="540.67" y="363.25" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">4</text>
+<line x1="550.67" y1="278.50" x2="971.33" y2="278.50" stroke="#dfe5e8" stroke-width="1"/>
+<text x="540.67" y="283.50" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">8</text>
+<line x1="550.67" y1="198.75" x2="971.33" y2="198.75" stroke="#dfe5e8" stroke-width="1"/>
+<text x="540.67" y="203.75" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">12</text>
+<line x1="550.67" y1="119.00" x2="971.33" y2="119.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="540.67" y="124.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">16</text>
+<line x1="550.67" y1="119.00" x2="550.67" y2="438.00" stroke="#667581" stroke-width="1"/>
+<line x1="550.67" y1="438.00" x2="971.33" y2="438.00" stroke="#667581" stroke-width="1"/>
+<text x="563.67" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">1</text>
+<text x="662.33" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">2</text>
+<text x="761.00" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">4</text>
+<text x="859.67" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">8</text>
+<text x="958.33" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">16</text>
+<text x="761.00" y="493.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="normal" fill="#253341">MPI ranks</text>
+<polyline points="563.67,418.06 662.33,398.87 761.00,381.19 859.67,369.30 958.33,375.39" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="563.67" cy="418.06" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="662.33" cy="398.87" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="761.00" cy="381.19" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="859.67" cy="369.30" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="958.33" cy="375.39" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<polyline points="563.67,418.06 662.33,398.12 761.00,358.25 859.67,278.50 958.33,119.00" fill="none" stroke="#727b83" stroke-width="2.5" stroke-dasharray="7 5"/>
+<line x1="550.67" y1="520.00" x2="573.67" y2="520.00" stroke="#087e8b" stroke-width="3"/>
+<text x="579.67" y="525.00" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">Measured</text>
+<line x1="685.67" y1="520.00" x2="708.67" y2="520.00" stroke="#727b83" stroke-width="3" stroke-dasharray="7 5"/>
+<text x="714.67" y="525.00" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">Ideal linear</text>
+<text x="1239.67" y="83.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="bold" fill="#253341">Parallel efficiency</text>
+<line x1="1029.33" y1="438.00" x2="1450.00" y2="438.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="1019.33" y="443.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">0%</text>
+<line x1="1029.33" y1="358.25" x2="1450.00" y2="358.25" stroke="#dfe5e8" stroke-width="1"/>
+<text x="1019.33" y="363.25" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">25%</text>
+<line x1="1029.33" y1="278.50" x2="1450.00" y2="278.50" stroke="#dfe5e8" stroke-width="1"/>
+<text x="1019.33" y="283.50" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">50%</text>
+<line x1="1029.33" y1="198.75" x2="1450.00" y2="198.75" stroke="#dfe5e8" stroke-width="1"/>
+<text x="1019.33" y="203.75" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">75%</text>
+<line x1="1029.33" y1="119.00" x2="1450.00" y2="119.00" stroke="#dfe5e8" stroke-width="1"/>
+<text x="1019.33" y="124.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">100%</text>
+<line x1="1029.33" y1="119.00" x2="1029.33" y2="438.00" stroke="#667581" stroke-width="1"/>
+<line x1="1029.33" y1="438.00" x2="1450.00" y2="438.00" stroke="#667581" stroke-width="1"/>
+<text x="1042.33" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">1</text>
+<text x="1141.00" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">2</text>
+<text x="1239.67" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">4</text>
+<text x="1338.33" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">8</text>
+<text x="1437.00" y="463.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="normal" fill="#253341">16</text>
+<text x="1239.67" y="493.00" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="normal" fill="#253341">MPI ranks</text>
+<polyline points="1042.33,119.00 1141.00,124.92 1239.67,210.77 1338.33,300.60 1437.00,375.39" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="1042.33" cy="119.00" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="1141.00" cy="124.92" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="1239.67" cy="210.77" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="1338.33" cy="300.60" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<circle cx="1437.00" cy="375.39" r="4.5" fill="#087e8b" stroke="#ffffff" stroke-width="1.2"/>
+<line x1="1029.33" y1="520.00" x2="1052.33" y2="520.00" stroke="#087e8b" stroke-width="3"/>
+<text x="1058.33" y="525.00" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="normal" fill="#253341">Measured</text>
+</svg>
