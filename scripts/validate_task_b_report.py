@@ -28,11 +28,17 @@ def check(condition, message):
 
 def report_rows(text, heading):
     section = text.split(heading, 1)[1].split("\n### ", 1)[0]
+    return parse_rows(section)
+
+
+def parse_rows(section):
     rows = {}
     for line in section.splitlines():
         if re.match(r"^\| \d+ \|", line):
             cells = [cell.strip().replace("**", "") for cell in line.strip("|").split("|")]
-            rows[int(cells[0])] = cells
+            ranks = int(cells[0])
+            check(ranks not in rows, f"Duplicate report table rank: {ranks}")
+            rows[ranks] = cells
     return rows
 
 
@@ -44,6 +50,8 @@ def records(path, matrix_name, n, nnz, ranks):
     check(len(rows) == 10, f"CSV row count: {path}")
     check({int(row["run_index"]) for row in rows} == set(range(10)), f"CSV indices: {path}")
     for row in rows:
+        check(set(row) == set(FIELDS) and all(row[key] not in (None, "") for key in FIELDS),
+              f"Incomplete or extra CSV fields: {path}")
         actual = (row["solver"], row["matrix_name"], int(row["n"]),
                   int(row["nnz"]), int(row["ranks"]), int(row["threads"]))
         check(actual == ("mpi", matrix_name, n, nnz, ranks, 1), f"CSV metadata: {path}")
@@ -85,6 +93,47 @@ def check_group(text, heading, ranks_list, filename, matrix_name, n, nnz, therma
                        f"{next(iter(iterations)):,}"]
         check(cells == common, f"Report table mismatch at {heading}, {p} ranks: {cells} != {common}")
     return grouped
+
+
+def check_3d_group(english, chinese):
+    job = "1502451.stdct-mgmt-02"
+    sizes = {40: (64000, 438400), 64: (262144, 1810432),
+             102: (1061208, 7366032)}
+    expected = {f"mpi_3d{size}_p{p}_{job}.csv"
+                for size in sizes for p in RANKS_POISSON}
+    actual = {path.name for path in (RESULTS / "3d").glob("*.csv")}
+    check(actual == expected, "3D CSV inventory")
+    for size, (n, nnz) in sizes.items():
+        tables = []
+        for text in (english, chinese):
+            after_title = text.split(f"**{size}³", 1)[1]
+            section = after_title.split("\n\n", 1)[1].split("\n\n", 1)[0]
+            tables.append(parse_rows(section))
+        check(tables[0] == tables[1], f"Bilingual 3D table: {size}")
+        check(set(tables[0]) == set(RANKS_POISSON), f"3D table ranks: {size}")
+        grouped = {p: records(RESULTS / "3d" / f"mpi_3d{size}_p{p}_{job}.csv",
+                              f"poisson_3d_{size}", n, nnz, p)
+                   for p in RANKS_POISSON}
+        means = {p: statistics.mean(float(row["solve_seconds"]) for row in grouped[p])
+                 for p in RANKS_POISSON}
+        for p, data in grouped.items():
+            times = [float(row["solve_seconds"]) for row in data]
+            iterations = {int(row["iterations"]) for row in data}
+            check(len(iterations) == 1 and 0 < next(iter(iterations)) <= 10000,
+                  f"3D iterations: {size}, {p}")
+            errors = [float(row["relative_solution_error"]) for row in data]
+            check(all(0 <= error < 1e-4 for error in errors),
+                  f"3D solution error: {size}, {p}")
+            expected_row = [str(p), "10/10", f"{means[p]:.6f}",
+                            f"{statistics.stdev(times):.6f}",
+                            f"{min(times):.6f}–{max(times):.6f}",
+                            f"{means[1] / means[p]:.4f}",
+                            f"{means[1] / means[p] / p:.4f}",
+                            str(next(iter(iterations))),
+                            f"{max(float(row['true_relative_residual']) for row in data):.6e}",
+                            f"{max(errors):.6e}"]
+            check(tables[0][p] == expected_row,
+                  f"3D report row mismatch: {size}, {p}")
 
 
 def check_poisson_figure(groups):
@@ -169,11 +218,12 @@ def main():
                           "thermal2/thermal2_p{p}_1495684.stdct-mgmt-02.csv",
                           "thermal2", 1228045, 8580313, thermal=True)
     check_thermal_log(thermal)
+    check_3d_group(text, translated)
     check_poisson_figure((poisson_512, poisson_1024))
     check_bilingual_parity(text, translated)
     for figure in re.findall(r"!\[[^]]*\]\(([^)]+)\)", text):
         check((ROOT / figure).is_file(), f"Missing report figure: {figure}")
-    print("Verified 21 CSVs, 210 timed records, both reports' 21 table rows, "
+    print("Verified 45 CSVs, 450 timed records, both reports' 45 table rows, "
           "shared figures/formulas/commands, Figure 1 data, thermal2 log, and figure paths.")
 
 
