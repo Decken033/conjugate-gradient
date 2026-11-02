@@ -1,12 +1,12 @@
 # DSA5208 — Person B Technical Report: Distributed-Memory MPI Conjugate Gradient
 
-- **Scope:** MPI CG implementation, correctness verification, and strong scaling
-- **Evidence:** Poisson and correctness jobs dated 24 October 2026; thermal2 PBS job `1495684.stdct-mgmt-02`; recovered 3D PBS output `dsa5208_mpi_scaling_3d.o1502451` and its 24 CSVs for job `1502451.stdct-mgmt-02`
-- **Status:** Implementation, Vanda tests, two 2D Poisson campaigns, one thermal2 campaign, and three 3D Poisson CSV series audited
+- **Scope:** MPI CG implementation, correctness verification, strong scaling, and weak scaling
+- **Evidence:** Earlier Poisson and correctness jobs; thermal2 job `1495684`; recovered 3D output for job `1502451`; strong and weak outputs for jobs `1509066` and `1509067`
+- **Status:** Implementation, Vanda tests, earlier scaling campaigns, and the 256-rank extension audited
 
 ## Abstract
 
-Person B implemented a C++17, double-precision, unpreconditioned distributed-memory Conjugate Gradient (CG) solver on row-partitioned CSR matrices. Distributed sparse matrix-vector multiplication (SpMV) uses `MPI_Allgatherv`, dot products use `MPI_Allreduce`, and the solver checks the distributed true residual. The latest Vanda correctness job passed 10/10 CTest targets and all MPI test executables at one, two, and four ranks. An audit of 45 selected benchmark CSV files found that all 450 recorded timed runs satisfied the documented convergence and numerical checks: 160 for two 2D Poisson workloads, 50 for SuiteSparse `thermal2`, and 240 for three 3D Poisson workloads. Mean solver-time speedup peaks at 16 ranks (2.8391× for 512×512 and 3.4184× for 1024×1024), eight ranks for `thermal2` (3.4458×), and 16, 16, and eight ranks for 40³, 64³, and 102³, respectively. Each speedup uses the same matrix's one-rank MPI mean. The recovered 3D PBS output confirms a completed 24-configuration campaign on an allocation listing two 36-slot hosts, with GCC 13.2.0, Open MPI 4.1.6, four warmups and ten timed runs per configuration. The submitted 3D script and actual rank placement remain unavailable.
+Person B implemented a C++17, double-precision, unpreconditioned distributed-memory Conjugate Gradient (CG) solver on row-partitioned CSR matrices. Distributed sparse matrix-vector multiplication (SpMV) uses `MPI_Allgatherv`, dot products use `MPI_Allreduce`, and the solver checks the distributed true residual. The latest Vanda correctness job passed 10/10 CTest targets. An audit of 60 benchmark CSV files found all 600 timed runs converged with true relative residual at most `1e-8` and relative solution error below `1e-4`: 450 earlier records and 150 new 256-rank strong and weak scaling records. In the new fixed 1024×1024 strong job, eight ranks give the fastest mean solver time, 7.488011 s (3.8536× its one-rank baseline); the curve falls back at higher ranks. In the new weak job, 16,384 unknowns per rank are maintained, but CG iterations increase from 231 to 3,439 and full-solve weak efficiency at 256 ranks is 0.000127. The PBS outputs confirm completed runs with four warmups and ten timed solves per configuration. Ratios use each job's own one-rank MPI mean. Earlier jobs cannot be used for controlled absolute-time comparisons, and no per-collective timings establish a communication fraction or cause of the scaling decline.
 
 ## 1. Introduction and Scope
 
@@ -102,7 +102,7 @@ The five selected `results/mpi/thermal2/thermal2_p<P>_1495684.stdct-mgmt-02.csv`
 
 ## 6. Numerical Correctness and Validation
 
-The separate correctness job passed 10/10 CTest targets and all nine direct MPI executable/rank combinations described in Section 3. For the performance campaigns, the audit checks the saved CSV records rather than re-executing the solver: 16 selected 2D files contain 160 timed records, five `thermal2` files contain 50, and 24 3D files contain 240. All 45 files have the expected schema, metadata and run indices, and all 450 records have a convergence flag, finite positive time, positive iteration count, recorded true relative residual at most $10^{-8}$, and finite relative solution error below $10^{-4}$. The benchmark implementation computed the true residual with a distributed SpMV and the solution error against $x^*=\mathbf{1}$ before writing these fields. No solution vectors were retained for independently recomputing all 450 residuals and errors from the CSV audit.
+The separate correctness job passed 10/10 CTest targets and all nine direct MPI executable/rank combinations described in Section 3. For the performance campaigns, the audit checks saved CSV records rather than re-executing the solver: 16 selected 2D files contain 160 timed records, five `thermal2` files contain 50, 24 3D files contain 240, and 15 extension files contain 150. All 60 files have the expected schema, metadata and run indices, and all 600 records have a convergence flag, finite positive time, positive iteration count, recorded true relative residual at most $10^{-8}$, and finite relative solution error below $10^{-4}$. The benchmark implementation computed the true residual with a distributed SpMV and the solution error against $x^*=\mathbf{1}$ before writing these fields. No solution vectors were retained for independently recomputing all 600 residuals and errors from the CSV audit.
 
 **Table 2. Recorded numerical maxima across selected timed runs; residuals and errors are relative and dimensionless.**
 
@@ -115,7 +115,7 @@ The separate correctness job passed 10/10 CTest targets and all nine direct MPI 
 | 3D Poisson 64³ | 80/80 | 158 | 9.032060e-09 | 8.909344e-09 |
 | 3D Poisson 102³ | 80/80 | 238 | 9.893192e-09 | 1.678557e-08 |
 
-The 3D output log independently confirms that every one of its 24 configuration summaries reached `Converged: 10/10`; those summaries echo only one iteration/residual pair per configuration, not all individual numerical measurements. The detailed 240-record numerical checks come from the CSVs. The analogous 2D and `thermal2` record counts are also CSV checks. Thus 450/450 describes validated recorded benchmark outcomes, not 450 independently reconstructed solutions.
+The 3D output log independently confirms that every one of its 24 configuration summaries reached `Converged: 10/10`; those summaries echo only one iteration/residual pair per configuration, not all individual numerical measurements. The detailed 240-record numerical checks come from the CSVs. The analogous 2D, `thermal2`, and extension record counts are also CSV checks. Thus 600/600 describes validated recorded benchmark outcomes, not independently reconstructed solutions.
 
 ## 7. Performance and Scaling
 
@@ -232,6 +232,47 @@ The generated seven-point Dirichlet stencil uses the manufactured solution $x^*=
 
 Across all 240 3D records, the maximum true relative residual is `9.893192e-09` and the maximum relative solution error is `1.678557e-08`. The 102³ speedup at 72 ranks rounds to 1.0000 in the table; at greater precision it is approximately 0.9999786, so it is marginally slower than one rank. Across each 3D size, iteration counts and the reported maximum error metrics are constant across ranks. The 64³ one-rank timing range includes a 0.540558 s measurement and gives a larger SD than most settings; all ten measurements are retained.
 
+### 7.6 Extended 2D strong scaling to 256 ranks — job 1509066
+
+This separate job held the 1024 x 1024 Poisson grid fixed (N = 1,048,576; NNZ = 5,238,784) and tested P = 1, 2, 4, 8, 16, 32, 36, 72, 144, 256. The retained PBS output records eight hosts with 36 slots each, Open MPI 4.1.6, a Release build request, core binding, four untimed warmups, ten timed solves per configuration, and a completion marker. All 100 CSV runs converged; every true relative residual is at most `1e-8` and every relative solution error is below `1e-4`. Values below derive from the ten slowest-rank solver times in each CSV. `S(P) = T(1)/T(P)` and `E(P) = S(P)/P`, where `T(1) = 28.855629833 s` is the **same job's** one-rank mean. SD is the sample SD. Time per iteration is `T(P)/1755`.
+
+**Table 9. Extended strong scaling; seconds unless stated otherwise.**
+
+| Ranks | Converged/runs | Mean s | SD s | Min-max s | Speedup | Efficiency (fraction) | Iterations | s/iteration | Max. true residual | Max. solution error |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 10/10 | 28.855630 | 0.074730 | 28.768574-29.028995 | 1.0000 | 1.0000 | 1755 | 0.016442 | 9.802e-09 | 4.819e-08 |
+| 2 | 10/10 | 14.892024 | 0.014700 | 14.864599-14.910291 | 1.9377 | 0.9688 | 1755 | 0.008485 | 9.802e-09 | 4.819e-08 |
+| 4 | 10/10 | 9.635185 | 0.038098 | 9.575441-9.699832 | 2.9948 | 0.7487 | 1755 | 0.005490 | 9.802e-09 | 4.819e-08 |
+| 8 | 10/10 | 7.488011 | 0.008232 | 7.477821-7.499196 | 3.8536 | 0.4817 | 1755 | 0.004267 | 9.802e-09 | 4.819e-08 |
+| 16 | 10/10 | 8.311225 | 0.007128 | 8.302022-8.322686 | 3.4719 | 0.2170 | 1755 | 0.004736 | 9.802e-09 | 4.819e-08 |
+| 32 | 10/10 | 10.702259 | 0.012008 | 10.689487-10.733922 | 2.6962 | 0.0843 | 1755 | 0.006098 | 9.802e-09 | 4.819e-08 |
+| 36 | 10/10 | 11.272234 | 0.033736 | 11.238995-11.344888 | 2.5599 | 0.0711 | 1755 | 0.006423 | 9.802e-09 | 4.819e-08 |
+| 72 | 10/10 | 26.065762 | 0.263830 | 25.627629-26.388369 | 1.1070 | 0.0154 | 1755 | 0.014852 | 9.802e-09 | 4.819e-08 |
+| 144 | 10/10 | 29.930964 | 0.167740 | 29.646970-30.279604 | 0.9641 | 0.0067 | 1755 | 0.017055 | 9.802e-09 | 4.819e-08 |
+| 256 | 10/10 | 24.540093 | 0.462706 | 23.677565-25.056423 | 1.1759 | 0.0046 | 1755 | 0.013983 | 9.802e-09 | 4.819e-08 |
+
+![Extended 2D Poisson strong scaling with logarithmic rank axis](results/mpi/extension/analysis/strong_scaling.svg)
+
+**Figure 4.** Mean solver time, speedup, parallel efficiency, and mean time per CG iteration. The horizontal axis is logarithmic in MPI ranks; the baseline is this job's one-rank mean, and each point represents ten timed runs. The fastest mean is at eight ranks. The mean rises to 8.311225 s at 16 ranks and 29.930964 s at 144 ranks, then falls to 24.540093 s at 256 ranks. Thus the curve is nonmonotonic; additional ranks beyond eight do not give sustained speedup. The iteration count remains 1,755, so the time changes occur within iterations rather than from a changing iteration count. Collective overhead and placement effects are plausible, but these CSVs contain no per-collective timing, so neither a communication fraction nor a definitive cause can be calculated. The earlier 1024 x 1024 experiment was a different job and allocation; its absolute times are not a controlled comparison with this one.
+
+### 7.7 Weak scaling to 256 ranks — job 1509067
+
+Grid width doubles when P quadruples, keeping `N/P = 16,384` unknowns at every configuration. The job used the same eight-node resource request and timing protocol as Section 7.6. All 50 CSV runs converged and met the same residual and solution-error checks. `E_weak(P) = T_weak(1)/T_weak(P)`, with this job's one-rank mean `T_weak(1) = 0.0369419313 s`; it is the conventional full-solve weak efficiency, not an iteration-normalized metric. `s/iteration = T_weak(P)/iterations` exposes changes in iteration cost separately from changes in count. All ratios use unrounded means.
+
+**Table 10. Weak scaling with constant unknowns per rank; seconds unless stated otherwise.**
+
+| Ranks | Grid | N/rank | Converged/runs | Mean s | SD s | Min-max s | Weak efficiency (fraction) | Iterations | s/iteration | Max. true residual | Max. solution error |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 128x128 | 16384 | 10/10 | 0.036942 | 0.000031 | 0.036910-0.036991 | 1.000000 | 231 | 0.000160 | 9.915e-09 | 1.101e-08 |
+| 4 | 256x256 | 16384 | 10/10 | 0.162465 | 0.001392 | 0.160017-0.165144 | 0.227385 | 454 | 0.000358 | 9.917e-09 | 1.186e-08 |
+| 16 | 512x512 | 16384 | 10/10 | 0.640462 | 0.048613 | 0.620295-0.778231 | 0.057680 | 894 | 0.000716 | 9.526e-09 | 2.211e-08 |
+| 64 | 1024x1024 | 16384 | 10/10 | 19.849509 | 0.144582 | 19.620453-20.090057 | 0.001861 | 1755 | 0.011310 | 9.802e-09 | 4.819e-08 |
+| 256 | 2048x2048 | 16384 | 10/10 | 291.132526 | 2.664642 | 288.323654-295.614486 | 0.000127 | 3439 | 0.084656 | 9.993e-09 | 1.068e-07 |
+
+![2D Poisson weak scaling with logarithmic rank axis](results/mpi/extension/analysis/weak_scaling.svg)
+
+**Figure 5.** Mean solver time, mean time per iteration, full-solve weak efficiency, and CG iteration count, with a logarithmic rank axis. Iterations increase from 231 to 3,439 as the grid grows from 128x128 to 2048x2048. Therefore fixed unknowns per rank does not fix total solver work; the rising iteration count contributes to the loss of full-solve weak efficiency. Per-iteration mean time also rises from 0.000160 to 0.084656 s. The experiment does not isolate communication from local work, process placement, or other system effects; no MPI collective breakdown was recorded.
+
 ## 8. Discussion and Limitations
 
 ### 8.1 Scaling interpretation
@@ -289,13 +330,13 @@ mpirun -np 8 ./build/run_mpi_benchmark thermal2 data/thermal2/thermal2.mtx 10 re
 
 Use a new output filename for each reproduced configuration because the CSV writer truncates existing files. These are reproduction instructions; no new HPC job or solver benchmark was executed during this audit. The current correctness script mixes a 4.1.8 module request with a build cache that historically resolved 4.1.6; reproduce with a consistent MPI compiler, runtime, and fresh build directory. Adapt account/scratch paths in the historical Poisson and correctness scripts. No submitted-script snapshot, binary hash, or historical CMake cache is available to establish the exact source/build provenance of every job.
 
-The 24 additional 3D CSVs reside in `results/mpi/3d/`; their `1502451.stdct-mgmt-02` suffix matches the recovered root-level `dsa5208_mpi_scaling_3d.o1502451` output. That log records the allocation and environment summarized in Section 5, but the original 3D PBS submission script was not found. A reproduction command can follow the runner's documented `3d <size> <repeats> <output.csv> [warmups]` interface with sizes 40, 64 and 102, ten repeats and four warmups; the original `mpirun` options must not be inferred from the log. Figures 1–3 describe the earlier 2D/thermal2 experiments and Section 7.5 presents the 3D results as tables. Run `python scripts/analyze_mpi_thermal2.py` to recompute thermal2 statistics and regenerate Figures 2 and 3. Run `python scripts/validate_task_b_report.py` to check the selected CSVs, numerical tables, Figure 1 data, log markers and figure paths. Figure 1 is a retained standalone SVG; its original plotting generator is unavailable.
+The 24 additional 3D CSVs reside in `results/mpi/3d/`; their `1502451.stdct-mgmt-02` suffix matches the recovered root-level `dsa5208_mpi_scaling_3d.o1502451` output. That log records the allocation and environment summarized in Section 5, but the original 3D PBS submission script was not found. `scripts/vanda/benchmark_mpi_3d_reproduce.pbs` is a reproduction plan, not a historical submitted script; the original `mpirun` options must not be inferred from it. Figures 1–3 describe the earlier 2D/thermal2 experiments, Section 7.5 presents the 3D results, and Figures 4–5 cover the new jobs. Run `python scripts/analyze_mpi_scaling_extension.py results/mpi/extension/strong_1509066.stdct-mgmt-02 results/mpi/extension/weak_1509067.stdct-mgmt-02 --output-dir results/mpi/extension/analysis` to regenerate the new summaries and SVGs. Run `python scripts/validate_task_b_report.py` to check all 60 CSVs, the tables, chart coordinates, log markers, DOCX key numbers, and figure paths. Figure 1 is a retained standalone SVG; its original plotting generator is unavailable.
 
 Environment statements above use the particular retained job logs, rather than treating the older `docs/ENVIRONMENT.md` as proof of every job's environment. Exact binary hashes, the historical CMake caches and all independent allocation effects remain unavailable.
 
 ## 10. Conclusion
 
-Task B's MPI implementation, Vanda correctness verification, two 2D Poisson scaling campaigns, the `thermal2` campaign and three 3D Poisson series are documented by source, logs and selected CSVs. The latest CTest passed 10/10; a 45-file CSV audit found all 450 recorded timed runs met the documented convergence and numerical checks, without independently reconstructing all solutions. The 3D mean-time optimum is 16 ranks for 40³ and 64³, and eight ranks for 102³. The 2D Poisson speedups peak at 16 ranks; `thermal2` is fastest at eight ranks. Full-vector Allgatherv and global reductions are credible scaling constraints, but their costs were not independently measured. The recovered 3D output verifies its two-host allocation listing, software environment, four warmups, ten timed runs per configuration and completed output sequence. The submitted script, exact process placement, build flags and scheduler exit status remain unavailable; conclusions apply to solver-only timings in the retained records.
+Task B's MPI implementation, Vanda correctness verification, earlier 2D Poisson, `thermal2`, and 3D campaigns, plus the 256-rank strong and weak extension are documented by source, logs and CSVs. The latest CTest passed 10/10; all 600 timed runs in 60 selected CSVs met the recorded convergence and numerical checks, without independently reconstructing solutions. The new fixed-grid strong job is fastest at eight ranks (7.488011 s), with nonmonotonic performance loss beyond that point. In the weak job, iterations rise from 231 to 3,439 as the grid grows, alongside a substantial rise in mean time per iteration. Each scaling ratio uses its own job's one-rank baseline; separate jobs are not controlled absolute-time comparisons. The CSVs do not isolate MPI collective time, so no communication fraction or definitive performance cause is established. The 3D reproduction PBS is a proposed method, not the submitted historical script; exact historical process placement and scheduler exit status remain unavailable.
 
 ## 11. References
 
