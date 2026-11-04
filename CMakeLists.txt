@@ -28,6 +28,13 @@ find_package(OpenMP REQUIRED COMPONENTS CXX)
 # Serial or OpenMP builds.
 option(CG_ENABLE_MPI "Build the distributed-memory MPI CG solver" ON)
 
+# Optional OpenMP GPU offloading (NVIDIA HPC SDK).
+# Disabled by default to preserve existing CPU and MPI builds.
+option(CG_ENABLE_OPENMP_GPU
+    "Build the optional NVHPC OpenMP GPU solver"
+    OFF
+)
+
 if(CG_ENABLE_MPI)
     find_package(MPI COMPONENTS CXX)
     if(MPI_CXX_FOUND)
@@ -314,4 +321,99 @@ if(BUILD_TESTING)
                     ${MPIEXEC_POSTFLAGS}
         )
     endif()
+endif()
+
+# ------------------------------------------------------------
+# Optional OpenMP GPU-offloaded CG solver.
+# This extension is disabled by default.
+# ------------------------------------------------------------
+if(CG_ENABLE_OPENMP_GPU)
+
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC")
+        message(FATAL_ERROR
+            "CG_ENABLE_OPENMP_GPU requires the NVHPC nvc++ compiler"
+        )
+    endif()
+
+    # GPU Conjugate Gradient solver.
+    add_library(cg_gpu STATIC
+        src/gpu/cg_gpu.cpp
+    )
+
+    target_link_libraries(cg_gpu PUBLIC
+        cg_common
+    )
+
+    target_compile_options(cg_gpu PRIVATE
+        -mp=gpu
+        -gpu=cc86
+    )
+
+    # GPU numerical correctness tests.
+    if(BUILD_TESTING)
+
+        add_executable(test_gpu_cg
+            tests/test_gpu_cg.cpp
+        )
+
+        target_link_libraries(test_gpu_cg PRIVATE
+            cg_gpu
+            cg_serial
+            cg_poisson
+            cg_ops
+        )
+
+        target_compile_options(test_gpu_cg PRIVATE
+            -mp=gpu
+            -gpu=cc86
+        )
+
+        target_link_options(test_gpu_cg PRIVATE
+            -mp=gpu
+            -gpu=cc86
+        )
+
+        add_test(
+            NAME gpu_cg
+            COMMAND test_gpu_cg
+        )
+
+        set_tests_properties(gpu_cg PROPERTIES
+            LABELS "gpu"
+            ENVIRONMENT "OMP_TARGET_OFFLOAD=MANDATORY"
+        )
+
+    endif()
+
+endif()
+
+# OpenMP GPU benchmark timing and CSV reporting.
+# Enabled only when the NVHPC GPU extension is selected.
+if(CG_ENABLE_OPENMP_GPU)
+    add_library(cg_gpu_benchmark STATIC
+        src/gpu/benchmark_gpu.cpp
+        src/gpu/benchmark_gpu_csv.cpp
+    )
+
+    target_link_libraries(cg_gpu_benchmark PUBLIC
+        cg_gpu
+        cg_ops
+    )
+
+    # Command-line GPU benchmark runner.
+    add_executable(run_gpu_benchmark
+        src/gpu/run_gpu_benchmark.cpp
+    )
+
+    target_link_libraries(run_gpu_benchmark PRIVATE
+        cg_gpu_benchmark
+        cg_poisson
+        cg_matrix_market
+    )
+
+    # Link the executable with NVIDIA GPU OpenMP support.
+    target_link_options(run_gpu_benchmark PRIVATE
+        -mp=gpu
+        -gpu=cc86
+    )
 endif()

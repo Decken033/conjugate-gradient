@@ -46,3 +46,11 @@ results/*
 # Downloaded or generated matrices
 data/*
 !data/.gitkeep
+
+# Preserve final Task A GPU benchmark evidence.
+!results/gpu_evidence/
+results/gpu_evidence/*
+!results/gpu_evidence/*.csv
+!results/gpu_evidence/*.pbs
+!results/gpu_evidence/CMakeCache.txt
+!results/gpu_evidence/dsa5208_gpu_scaling.o1518726
