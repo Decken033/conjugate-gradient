@@ -1,5 +1,7 @@
 # DSA5208 — Parallel Conjugate Gradient Solver
 
+The optional November GPU extension is documented in [the GPU instructions](#optional-task-a-openmp-gpu-extension) and [Task A report Section 9](REPORT_TASK_A.md#9-optional-openmp-gpu-offloading-extension).
+
 NUS DSA5208 Group Project — parallel implementation and performance evaluation of the Conjugate Gradient (CG) method for sparse symmetric positive definite (SPD) linear systems.
 
 ## 1. Project Overview
@@ -14,7 +16,7 @@ Ax=b,
 
 where \(A\) is a sparse SPD matrix. The serial implementation provides the tested reference solver and shared matrix infrastructure used to develop and evaluate the parallel versions.
 
-**Project status through 24 October 2026.** Task A (Person A) completed serial and CPU OpenMP CG; both were tested, benchmarked, documented, and merged into `main` (latest Task A commit `c35e9d8`). Its Vanda Release build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). Person B's MPI implementation and two scaling campaigns are also complete and documented below; the hybrid implementation remains Person C's responsibility. **OpenMP GPU target offloading is optional and has not been implemented or benchmarked.**
+**Project status through 24 October 2026.** Task A (Person A) completed serial and CPU OpenMP CG; both were tested, benchmarked, documented, and merged into `main` (latest Task A commit `c35e9d8`). Its Vanda Release build passed **7/7 CTest tests** (PBS job `1471910`, CN-006). Person B's MPI implementation and two scaling campaigns are also complete and documented below; the hybrid implementation remains Person C's responsibility. **November GPU update:** the optional extension is implemented on `feat/task-a-openmp-gpu-offload`, with 90 validated measured solves archived from Vanda; it remains disabled by default and pending review/merge. See [GPU instructions](#optional-task-a-openmp-gpu-extension).
 
 **Person A report:** [REPORT_TASK_A.md](REPORT_TASK_A.md) — implementation, correctness, measured scaling, scheduling, reproducibility and limitations. [Full benchmark tables](docs/task_a/benchmark_tables.md) and [experimental methodology](docs/task_a/benchmark_methodology.md) support that report.
 
@@ -26,7 +28,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 | CPU OpenMP CG | Shared-memory multithreading | **Completed and merged into `main`**; 7/7 tests passed; scaling/scheduling results and report committed |
 | MPI CG | Distributed-memory multiprocessing | **Implemented, built and validated on Vanda**; correctness and 512²/1024² scaling results documented (Person B) |
 | Hybrid CG | MPI + CPU OpenMP | Pending / team integration (Person C) |
-| GPU CG | OpenMP target offloading | **Optional extension if time permits**; not implemented or benchmarked |
+| GPU CG | OpenMP target offloading | **Optional, disabled by default**; Vanda A40 evidence available; branch pending review/merge |
 
 ### Completed Task 1 capabilities
 
@@ -68,7 +70,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 
 | Member | Primary responsibility |
 |---|---|
-| Person A | **Task A completed:** Task 1 serial CG and Task 2 CPU OpenMP CG; optional GPU OpenMP offloading only if time permits |
+| Person A | **Task A completed:** Task 1 serial CG and Task 2 CPU OpenMP CG; optional GPU OpenMP extension prepared separately for review |
 | Person B | MPI CG using the shared matrix-generation utilities |
 | Person C | Hybrid MPI + OpenMP CG, independent benchmarking and GPU comparisons |
 
@@ -263,8 +265,8 @@ Primary testing and benchmarking environment: **NUS Vanda HPC**.
 | CPU observed during performance investigation | Intel Xeon Platinum 8452Y (CN-016) |
 | Shared-memory OpenMP | CPU solver built and validated on Vanda; 1–72-thread scaling measured |
 | Open MPI | 4.1.6 in recorded MPI scaling jobs; the correctness job's CMake configuration resolved the 4.1.6 MPI compiler despite requesting the site 4.1.8 module |
-| NVIDIA GPU | A40 observed elsewhere on Vanda; GPU solver not implemented in this branch |
-| NVIDIA HPC SDK | 24.5 (offload feasibility checked) |
+| NVIDIA GPU | A40 GPU extension documented separately below; original CPU platform unchanged |
+| NVIDIA HPC SDK | 24.5 for historical feasibility; 24.7 / CUDA 12.3 for the November GPU campaign |
 
 The recorded serial benchmarks were executed on allocated compute nodes, including **CN-016** (performance diagnosis) and **CN-149** (`thermal2`). Avoid treating timings from different compute nodes and allocations as directly interchangeable.
 
@@ -510,7 +512,7 @@ See [Person A report](REPORT_TASK_A.md), [tables](docs/task_a/benchmark_tables.m
 
 ### 9.7 Team-wide parallel evaluation (forthcoming)
 
-MPI and hybrid comparisons should use compatible matrices, numerical tolerance and timing boundaries. For MPI/hybrid timings, use the slowest rank's relevant solve elapsed time and account for MPI rank/thread allocations and communication. GPU OpenMP target offloading may be investigated **only if time permits**, as a separate optional extension; **no GPU implementation or speedups are claimed here**.
+MPI and hybrid comparisons should use compatible matrices, numerical tolerance and timing boundaries. For MPI/hybrid timings, use the slowest rank's relevant solve elapsed time and account for MPI rank/thread allocations and communication. The optional GPU extension and its observed cross-node speedups are documented separately below and in report Section 9; historical CPU baselines remain unchanged.
 
 ### 9.8 Controlled serial size scaling (4 November 2026)
 
@@ -606,7 +608,7 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 | Task A serial size-scaling evidence | **Completed 4 November 2026**: 80/80 converged timed solves; six revised figures and clean campaign archive prepared for review; November additions are not yet committed |
 | Task A — Person A completion and integration | **COMPLETED**: Task 1 + Task 2, benchmarks, figures, README and `REPORT_TASK_A.md` merged directly into `main` (`c35e9d8`); no PR required |
 | MPI / hybrid | **Person B MPI complete (October 2026)**: row-partitioned MPI CG, distributed SpMV/dot, collective-safe solver, 10/10 CTest, MPI tests at 1/2/4 ranks, 512² and 1024² scaling (80/80 converged runs per size), PBS scripts, `REPORT_TASK_B.md`; hybrid remains Person C's work |
-| OpenMP GPU offload | **Optional extension if time permits**; not implemented or benchmarked; outside completed Task A scope |
+| OpenMP GPU offload | **Optional extension, disabled by default**; implemented and benchmarked on Vanda A40; separate review pending |
 
 Full Person A reporting and evidence: [REPORT_TASK_A.md](REPORT_TASK_A.md).
 
@@ -618,4 +620,76 @@ These are **optional** beyond the core project scope:
 2. **Matrix conditioning:** study how conditioning influences CG convergence and residual-versus-solution-error behavior.
 3. **GMRES comparison:** compare convergence and computational expense against a non-CG iterative method, if time and project scope allow.
 
-**Task A is already complete and merged into `main`.** Priority now shifts to teammates' MPI/hybrid integration and the group-wide evaluation. **GPU OpenMP target offloading is optional and will be pursued only if time permits** after core deliverables; any such work should use a separate branch and independently validate compiler/hardware support, numerical correctness and performance.
+**Task A is already complete and merged into `main`.** Priority now shifts to teammates' MPI/hybrid integration and the group-wide evaluation. **GPU OpenMP target offloading remains optional**; its implementation and saved Vanda evidence are on a separate feature branch awaiting review. No merge is implied by this documentation.
+
+## Optional Task A OpenMP GPU extension
+
+GPU support is **OFF by default** (`CG_ENABLE_OPENMP_GPU=OFF`). Ordinary CPU/MPI builds require no NVIDIA compiler. This extension uses OpenMP target directives, explicit device allocations and GPU reductions; it does not replace the CPU implementations or change their historical baselines.
+
+The verified environment is Vanda NVIDIA A40 (compute capability 8.6), `GCC/13.2.0`, `NVHPC/24.7-CUDA-12.3.0`, C++17 and CMake 3.27.6. Compile on the login node in a **separate** `build-gpu` directory; never reuse the GCC build cache or the archived CMake cache:
+
+```bash
+module load GCC/13.2.0
+module load CMake/3.27.6-GCCcore-13.2.0
+module load NVHPC/24.7-CUDA-12.3.0
+module list
+nvc++ --version
+
+cmake -S . -B build-gpu \
+  -DCMAKE_CXX_COMPILER=nvc++ \
+  -DCMAKE_BUILD_TYPE=Release \
+  '-DCMAKE_CXX_FLAGS_RELEASE=-O2 -DNDEBUG' \
+  -DCG_ENABLE_OPENMP_GPU=ON \
+  -DCG_ENABLE_MPI=OFF \
+  -DBUILD_TESTING=ON
+cmake --build build-gpu --target test_gpu_cg run_gpu_benchmark --verbose
+```
+
+CMake applies `-mp=gpu -gpu=cc86` to GPU kernel compilation and executable linking. The host-only benchmark library/runner do not require target compilation. Existing CPU OpenMP discovery remains enabled (`-mp` with NVHPC); GPU flags are not added to shared or CPU/MPI targets.
+
+Execute GPU tests and benchmarks **only in an allocated GPU job**, using queue `auto` and `OMP_TARGET_OFFLOAD=MANDATORY`. The following is a template to save as a new PBS file at the project root and submit with `qsub <new-file>.pbs`; it was not submitted by this documentation update:
+
+```bash
+#!/bin/bash
+#PBS -N dsa5208_gpu_check
+#PBS -q auto
+#PBS -l select=1:ncpus=2:ngpus=1:mem=12gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+set -euo pipefail
+cd "$PBS_O_WORKDIR"
+module load GCC/13.2.0
+module load CMake/3.27.6-GCCcore-13.2.0
+module load NVHPC/24.7-CUDA-12.3.0
+export OMP_TARGET_OFFLOAD=MANDATORY
+nvidia-smi
+ctest --test-dir build-gpu -L gpu --output-on-failure
+
+# Unique directory: the CSV writer otherwise overwrites a reused path.
+mkdir -p results/gpu_scaling
+campaign=$(mktemp -d "results/gpu_scaling/$(date -u +%Y%m%dT%H%M%SZ)_XXXXXX")
+./build-gpu/run_gpu_benchmark 2d 512 10 "$campaign/gpu_2d_512.csv" 4
+./build-gpu/run_gpu_benchmark 3d 64 10 "$campaign/gpu_3d_64.csv" 4
+# Requires the separately downloaded thermal2 Matrix Market file:
+./build-gpu/run_gpu_benchmark thermal2 data/suitesparse/thermal2/thermal2.mtx \
+  10 "$campaign/gpu_thermal2.csv" 4
+```
+
+CLI: `run_gpu_benchmark <2d|3d|thermal2> <grid_size|matrix.mtx> <repeats> <output.csv> [warmups]`. Repeats and an explicitly supplied warmup count must be positive; default warmups = 1. Tolerance `1e-8`, maximum iterations 10,000 and zero initial guess are fixed by the runner. The benchmark checks every result independently on the CPU after timing. `solve_seconds` includes the complete solver call, including internal validation, allocation, transfers, computation and cleanup; it is not kernel-only time. CSV `threads=1` does not describe GPU threads or the two-core PBS allocation. Missing GPU execution causes failure rather than a reported CPU-fallback benchmark.
+
+The authoritative [GPU evidence archive](results/gpu_evidence/) contains nine raw CSVs (90 measured solves), `gpu_summary.csv`, `gpu_vs_serial.csv`, `gpu_vs_openmp.csv`, the executed PBS script, log and historical CMake cache. All 90 measured solves passed the residual tolerance. The cache contains machine-specific provenance paths and should not be reused. The archived PBS script uses fixed filenames; preserve it as evidence and use unique directories for any future runs. Source/executable hashes and a separate unit-test transcript are not included in this archive.
+
+Read-only evidence checking requires Python 3.9+ and only its standard library:
+
+```bash
+python scripts/validate_gpu_evidence.py
+```
+
+With matplotlib, numpy, pandas and Pillow installed, validate plot inputs without changing outputs, or deliberately regenerate the three GPU figure pairs:
+
+```bash
+python scripts/plot_gpu_comparison.py --validate-only
+python scripts/plot_gpu_comparison.py
+```
+
+The [GPU figures](docs/task_a/figures/gpu/) are PNG/SVG pairs numbered provisionally 7–9; Figures 1–6 remain unchanged. [Report Section 9](REPORT_TASK_A.md#9-optional-openmp-gpu-offloading-extension) explains the algorithm, validation, performance and limitations. Observed speedups use different CPU/GPU nodes and compilers (GCC `-O3` versus NVHPC `-O2`): they do not isolate architecture alone. Serial CPU was faster for the smallest 2D/3D cases. The November serial baseline is used for this GPU comparison only; earlier OpenMP speedup/efficiency baselines remain intact.

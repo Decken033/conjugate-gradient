@@ -4,9 +4,9 @@
 - **Evaluation dates:** October 2026 OpenMP campaigns; 4 November 2026 controlled serial campaign
 - **System:** NUS Vanda HPC cluster
 - **Implementation:** C++17, CSR sparse matrices, double-precision CG, GCC 13.2.0 Release (`-O3 -DNDEBUG`)
-**Status:** Serial and CPU OpenMP implementations are integrated into `main`. November serial evidence and revised documentation are prepared for review and are not yet committed. MPI, hybrid and GPU results are **outside the scope of this report**.
+**Status:** Serial and CPU OpenMP implementations are integrated into `main`. November serial evidence and revised documentation are prepared for review and are not yet committed. Section 9 adds the optional November GPU study for review; MPI and hybrid results remain outside this report.
 
-> **Evidence scope.** All numerical and performance results below are transcribed from the verified benchmark summaries and job outputs. The complete 88-CSV/10-PBS-script/10-log archive remains in the local `Vanda_Results_20261021` directory. The six revised PNG/SVG figures and source-derived supplemental tables are under [`docs/task_a/`](docs/task_a/). This report does not claim a successful GPU run or a completed MPI/hybrid integration.
+> **Evidence scope.** All numerical and performance results below are transcribed from the verified benchmark summaries and job outputs. The complete 88-CSV/10-PBS-script/10-log archive remains in the local `Vanda_Results_20261021` directory. The six revised PNG/SVG figures and source-derived supplemental tables are under [`docs/task_a/`](docs/task_a/). Section 9 separately identifies the November GPU evidence; this report does not claim completed MPI/hybrid integration.
 
 The November serial campaign is archived separately under [`results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/`](results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/), without generated build artifacts.
 
@@ -26,7 +26,7 @@ The Person A work addressed:
 2. **Task 2 — CPU shared-memory parallelism:** implement CPU OpenMP CG and parallel sparse operations, expose scheduling/thread controls, verify numerical results, and evaluate strong scaling and runtime variability on Vanda.
 3. **Reproducibility:** preserve per-run CSV records, PBS job specifications, automated-test evidence and report-ready analysis.
 
-Work completed by teammates on MPI and hybrid MPI+OpenMP is not included here. The professor's suggestion to investigate OpenMP GPU target offloading is a potential *subsequent extension*, not a feature of the verified CPU implementation.
+Work completed by teammates on MPI and hybrid MPI+OpenMP is not included here. The optional GPU extension is documented separately in Section 9 and does not alter the verified CPU implementation.
 
 ## 2. Numerical problem and CG methodology
 
@@ -291,7 +291,7 @@ See [full statistics, provenance and captions](docs/task_a/serial_scaling_analys
 
 **Numerical behavior.** Floating-point parallel reductions need not be bitwise identical to serial reductions. Results are evaluated against numerical residual/error tolerances, not exact iteration-history equality.
 
-**Scope of outcome.** No GPU target-offloading performance or energy measurements were obtained, and no controlled MPI/hybrid comparison is claimed in this document.
+**Scope of outcome.** The CPU campaigns in Sections 1–8 contain no GPU measurements. Section 9 adds a separate GPU performance study; no energy measurements or controlled MPI/hybrid comparison are claimed.
 
 **November stability check.** The controlled serial campaign used one fixed shuffled order and a repeated 512² case, but its median rose by 14.4339%. This single-job observation does not provide a general error bound or eliminate temporal confounding.
 
@@ -374,9 +374,94 @@ The Task 1 serial implementation provided a single-thread reference and reliable
 
 The optimal *observed* thread count depended strongly on workload size: 8 threads for 512² yielded **2.264×** speedup over serial, whereas 72 threads for 1024² yielded **5.090×**. The larger problem sustained speedup to higher thread counts but still reached only **5.77% OpenMP-relative efficiency at 72 threads**. Diminishing returns indicate the value of investigating overheads, memory behavior and alternative decomposition strategies without assuming an unmeasured cause. Scheduling experiments highlighted the cost of default fine-grained dynamic scheduling while underscoring the need to control runtime drift and repeat baselines when comparing policies.
 
-These results constitute a reproducible **CPU shared-memory baseline** for the team's MPI and hybrid comparisons. Future integration should retain the same matrices, manufactured RHS, true-residual tolerance, compiler/build disclosure, and clearly specified timing baselines. Any GPU-offloading study should be conducted separately, with device mapping, build support and numerical correctness established before performance claims.
+These results constitute a reproducible **CPU shared-memory baseline** for the team's MPI and hybrid comparisons. Future integration should retain the same matrices, manufactured RHS, true-residual tolerance, compiler/build disclosure, and clearly specified timing baselines. The separate GPU study in Section 9 preserves these CPU results and discloses its own execution, correctness and timing evidence.
 
 Across the three completed performance campaigns, **400/400 timed CG solves converged**: **180** in the earlier OpenMP strong-scaling campaigns (including their 20 serial-reference runs), **140** in OpenMP scheduling, and **80** in the new serial scaling campaign. They came from separate experiments and allocations. Warmups are excluded. The historical 54-run selected correctness table overlaps some scaling records and is not added to this total.
+
+## 9. Optional OpenMP GPU offloading extension
+
+### 9.1 Motivation and implementation
+
+This separately evaluated extension investigates whether OpenMP target execution can reduce CG solve time for larger sparse systems. It supplements the CPU study in Sections 1–8; it does not replace its serial baselines, OpenMP efficiency definitions or conclusions. MPI and hybrid implementations remain outside this study.
+
+The implementation in `src/gpu/cg_gpu.cpp` retains double-precision CSR storage, a zero initial guess and the existing CG recurrence. CSR SpMV assigns rows to `target teams distribute parallel for`; each row accumulates its nonzeros sequentially. Dot products use `reduction(+:sum)`. Solution/residual updates, search-direction updates, true-residual subtraction and restart copies execute as elementwise target kernels. Scalar coefficients and convergence decisions remain on the host. No cuBLAS, cuSPARSE or other external numerical solver is used.
+
+Noncopyable `DeviceBuffer` objects own allocations made with `omp_target_alloc` and release them through `omp_target_free`, including on ordinary C++ exception paths. `omp_target_memcpy` uploads CSR arrays and initial vectors once per solve, and downloads the final solution. Kernels use `is_device_ptr`; the arrays are explicit device allocations, not deep copies of host `std::vector` objects. Working arrays remain on the default device throughout a solve. Target regions are synchronous. The solver checks device availability and rejects target execution on the initial/host device before allocating GPU memory.
+
+The solver checks breakdown conditions, verifies the true residual before accepting convergence, and restarts from that residual if recursive residual drift is detected. It also computes the true residual on iteration-limit exit. Parallel reduction order can change rounding and iteration counts; bitwise agreement with the serial solver is not assumed.
+
+### 9.2 Platform, protocol and timing boundary
+
+The archived campaign ran on Vanda node `GN-A40-040` on 4 November 2026, with PBS output `dsa5208_gpu_scaling.o1518726`. The recorded device was an NVIDIA A40 with 46,068 MiB reported memory. The PBS request used queue `auto`, `select=1:ncpus=2:ngpus=1:mem=12gb`, and a two-hour walltime. Compilation used NVIDIA HPC SDK 24.7 / CUDA 12.3, C++17, Release `-O2 -DNDEBUG`, and OpenMP offloading flags `-mp=gpu -gpu=cc86`. The separate build enabled `CG_ENABLE_OPENMP_GPU` and disabled MPI. Execution required `OMP_TARGET_OFFLOAD=MANDATORY`.
+
+Each configuration received four untimed warmups and ten measured solves. The tolerance was `1e-8`, with a maximum of 10,000 iterations. The manufactured solution was the all-ones vector and the RHS was formed as `b = A*x_exact`. Execution order was 2D 64, 256, 512, 1024; 3D 16, 40, 64; thermal2; then a repeated 2D 256 reference. This was a fixed increasing-size order within each geometry, not a randomized campaign.
+
+`solve_seconds` measures the complete `solve_gpu_cg()` call using a host steady clock. It includes solver input validation, device-execution checking, host preparation, device allocation, transfers, kernels, scalar control, convergence verification, solution download and allocation cleanup. Matrix generation/loading, RHS construction, benchmark-level validation, independent post-solve CPU accuracy checks, progress printing and CSV writing occur outside the timed call. In particular, **the solver's own validation is timed**. These measurements are end-to-end solver times, not isolated GPU kernel times.
+
+The serial comparator used an Intel Xeon Platinum 8452Y, one pinned core and GCC 13.2 Release `-O3`. Earlier CPU OpenMP measurements used the same CPU model and GCC 13.2, with up to 72 physical cores across two sockets. CPU and GPU experiments used different Vanda nodes and compiler/optimization configurations. Their ratios are observed cross-node comparisons, not architecture-only or identical-hardware-controlled speedups.
+
+### 9.3 Numerical evidence and independent verification
+
+The nine raw CSVs in [the GPU evidence archive](results/gpu_evidence/) contain exactly ten measured rows each. All **90/90** rows report convergence, finite nonnegative execution times and solution errors, and independently computed true relative residuals at or below `1e-8`. The benchmark recomputes `A*x` using the host CSR implementation after each solve and records `||b-A*x||_2/||b||_2` and `||x-x_exact||_2/||x_exact||_2`. Its norm calculations use repeated `std::hypot`. Thus the CSV residual is an independent CPU check, not merely the solver's device-reported diagnostic. Residual tolerance and solution error are distinct quantities.
+
+`tests/test_gpu_cg.cpp` additionally checks a known 2-by-2 SPD solution and manufactured Poisson problems (2D 16, 2D 64 and 3D 8), comparing against serial solutions and host-computed residuals. These tests use runtime checks that remain active in Release builds. The author reports successful Vanda GPU testing; the archived scaling log demonstrates benchmark execution but contains no separate `test_gpu_cg`/CTest transcript. This documentation review did not rerun GPU tests.
+
+### 9.4 Runtime scaling and serial comparison
+
+The following medians were recalculated from saved raw measurements. The serial values come from the November controlled serial campaign, using its initial 512² measurement. The final GPU 256² repeat is excluded from scaling curves.
+
+| Matrix | N | NNZ | Iterations (serial/GPU) | Serial median (s) | GPU median (s) | Serial/GPU ratio |
+|---|---:|---:|---:|---:|---:|---:|
+| 2D 64² | 4,096 | 20,224 | 122 / 122 | 0.003590079 | 0.006594136 | 0.5444 |
+| 2D 256² | 65,536 | 326,656 | 454 / 454 | 0.261928640 | 0.039213642 | 6.6795 |
+| 2D 512² | 262,144 | 1,308,672 | 894 / 894 | 2.092506991 | 0.141967791 | 14.7393 |
+| 2D 1024² | 1,048,576 | 5,238,784 | 1755 / 1755 | 37.698564427 | 0.888107101 | 42.4482 |
+| 3D 16³ | 4,096 | 27,136 | 41 / 41 | 0.001445311 | 0.002372485 | 0.6092 |
+| 3D 40³ | 64,000 | 438,400 | 101 / 101 | 0.063721961 | 0.010710462 | 5.9495 |
+| 3D 64³ | 262,144 | 1,810,432 | 158 / 158 | 0.546246890 | 0.040442366 | 13.5068 |
+
+Ratios use unrounded medians: `S_serial = median(T_serial) / median(T_GPU)`. Values below one favour the serial CPU. The GPU is slower for the smallest 2D and 3D cases, while the largest tested 2D case achieves an observed ratio of 42.45. Launch, allocation and transfer overhead provide a plausible explanation for the small-problem disadvantage, but their separate contributions were not profiled.
+
+Runtime depends on both NNZ per SpMV and iteration count. At N = 262,144, the 3D matrix has more nonzeros than the 2D matrix but requires 158 rather than 894 iterations and completes faster. Consequently, these curves do not isolate a constant-iteration complexity law or establish scaling from N alone.
+
+![Serial CPU and GPU runtime scaling](docs/task_a/figures/gpu/figure7_gpu_runtime_scaling.png)
+
+*Figure 7 (provisional). Median serial CPU and end-to-end NVIDIA A40 CG runtime versus N, with logarithmic axes and separate 2D/3D series. Each median represents ten measured solves; repeated reference checks are excluded. Experiments used different Vanda nodes and compiler configurations.*
+
+![GPU speedup versus serial CPU](docs/task_a/figures/gpu/figure8_gpu_speedup_vs_serial.png)
+
+*Figure 8 (provisional). Ratio of November controlled serial median time to GPU median time. The horizontal unity line marks equal runtime. GPU timings include device allocation and transfers; ratios describe observed cross-node performance.*
+
+### 9.5 Comparison with best measured CPU OpenMP
+
+| Matrix | Best measured CPU threads | CPU OpenMP median (s) | GPU median (s) | OpenMP/GPU ratio |
+|---|---:|---:|---:|---:|
+| 2D 512² | 8 | 0.916490618 | 0.141967791 | 6.4556 |
+| 2D 1024² | 72 | 7.186726444 | 0.888107101 | 8.0922 |
+
+Here `S_OpenMP = min_p median(T_OpenMP,p) / median(T_GPU)`, with the minimum taken only over tested thread counts. These baselines are selected from [the existing OpenMP consolidated results](docs/task_a/consolidated/scaling_summary.csv). They are not claims of globally optimal CPU performance. The earlier OpenMP serial-relative and one-thread-relative speedup/efficiency calculations remain unchanged; the November serial medians above are not substituted into those historical calculations.
+
+![GPU compared with fastest measured CPU OpenMP](docs/task_a/figures/gpu/figure9_gpu_vs_cpu_openmp.png)
+
+*Figure 9 (provisional). End-to-end GPU median time compared with the fastest measured CPU OpenMP median for each matrix: eight threads for 512² and 72 threads for 1024². Annotations report CPU/GPU time ratios. Hardware nodes and compiler configurations differ.*
+
+The corresponding SVG files are available alongside the PNGs. Figure numbers 7–9 remain provisional pending group-report integration.
+
+### 9.6 thermal2, stability and limitations
+
+For thermal2, N = 1,228,045 and NNZ = 8,580,313. All ten measured solves converged, with median runtime **4.011878524 s**, iteration counts **4,329–4,331**, maximum independent relative residual **9.9969799673204e-9**, and maximum relative solution error **4.442428936370787e-7**. The residual tolerance does not imply a solution error below `1e-8`. No thermal2 CPU/GPU speedup is inferred here without a corresponding comparison baseline.
+
+The initial 256² GPU median was 0.0392136415 s and the final median was 0.0391111015 s. Relative median drift, `100*(final/initial - 1)`, was **−0.261490635%**. This is a limited endpoint stability check, not evidence that every workload experienced identical conditions. Sample runtime CV was approximately 0.183% initially and 3.629% for the repeat; the small median shift does not eliminate within-block variability or execution-order effects.
+
+The campaign does not measure kernel-only time, energy, bandwidth, occupancy or transfer costs separately. It uses one GPU model, one allocation and a limited matrix set. Differences in host hardware, compiler and optimization level confound architecture-only attribution. No MPI/hybrid comparison is claimed. Larger observed speedups support the practical value of this optional implementation for the tested workloads, while the small cases demonstrate that offloading is not universally beneficial.
+
+### 9.7 Reproducibility and review status
+
+The archive contains nine raw GPU CSVs, three analysis CSVs, the executed PBS script, execution log and historical CMake cache. The cache confirms Release `-O2 -DNDEBUG`, GPU enabled, MPI disabled and host OpenMP detection using `-mp`. Absolute paths and account identifiers in that cache are historical provenance, not portable configuration or credentials; do not copy it into a new build directory. The archive does not contain an executable hash, source hash/commit binding, full compile/link transcript or separate unit-test transcript. Current source inspection and recorded configuration therefore cannot prove byte-for-byte reconstruction of the historical executable.
+
+Run `python scripts/validate_gpu_evidence.py` for read-only schema, raw-row, summary, baseline-ratio and execution-order checks. It recalculates sample standard deviations with denominator n−1. `python scripts/plot_gpu_comparison.py --validate-only` additionally checks plotting inputs when matplotlib, numpy, pandas and Pillow are installed. Running the plotter without that flag regenerates only the GPU figures from saved data; it does not execute benchmarks. See the [README GPU instructions](README.md#optional-task-a-openmp-gpu-extension) for the separate NVHPC build and allocated execution procedure.
+
+Code review found synchronous device operations and automatic allocation cleanup, with no changes required to the CPU algorithms or shared CSR type. The CSV retains the CPU-compatible twelve-column schema with `solver=openmp_gpu`; `threads=1` is a host-side schema convention, not the allocated core count or GPU thread count. The existing writer truncates an existing output path, so reproduction must use a fresh output directory. Dedicated automated GPU edge-case and benchmark-writer tests remain incomplete (zero RHS, invalid inputs, iteration limits, breakdown and unavailable-device scenarios). These are test-coverage limitations, not failures demonstrated by the archived successful solves.
 
 ## References
 
@@ -389,4 +474,4 @@ Across the three completed performance campaigns, **400/400 timed CG solves conv
 
 ---
 
-*Document state: report-ready draft based on 21 October 2026 Person A results. Update integration/PR status when the branch is merged; do not imply teammates' parallel components or GPU experiments have been verified by this report.*
+*Document state: review draft incorporating the October CPU results and November serial/GPU evidence. The optional GPU extension has not been merged by this review; teammate MPI/hybrid validation is outside scope.*
