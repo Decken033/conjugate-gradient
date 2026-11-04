@@ -1,0 +1,9 @@
+sequence,geometry,grid_size,n,nnz,role,output_csv
+1,2d,512,262144,1308672,core,serial_2d_512.csv
+2,3d,16,4096,27136,core,serial_3d_16.csv
+3,2d,1024,1048576,5238784,core,serial_2d_1024.csv
+4,3d,40,64000,438400,core,serial_3d_40.csv
+5,2d,64,4096,20224,core,serial_2d_64.csv
+6,3d,64,262144,1810432,core,serial_3d_64.csv
+7,2d,256,65536,326656,core,serial_2d_256.csv
+8,2d,512,262144,1308672,drift_check,serial_2d_512_endcheck.csv

@@ -1,0 +1,4 @@
+# Preserve exact bytes of this Task A evidence archive for SHA256 verification.
+results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/* -text
+# The standalone Vanda submission script must retain Linux line endings.
+scripts/vanda/benchmark_serial_scaling.pbs text eol=lf

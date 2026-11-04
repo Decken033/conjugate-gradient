@@ -424,7 +424,9 @@ solver,matrix_name,n,nnz,ranks,threads,run_index,iterations,converged,solve_seco
 
 For serial CG, `ranks=1`, `threads=1`, and `converged=1` denotes success. OpenMP retains the first twelve columns and adds `schedule,chunk_size`. Retain each recorded repetition rather than reporting only a best run. Unless noted otherwise, historic values below are **exploratory Task 1 measurements** from Release builds on Vanda. Controlled 512² and 1024² serial references, measured in their corresponding OpenMP scaling jobs, appear in §9.5.
 
-### 9.2 Synthetic Poisson results
+### 9.2 Historical synthetic Poisson results
+
+These earlier observations are retained for traceability. Use §9.8 for the completed controlled serial size-scaling campaign; use §9.5 for the original OpenMP campaign and its serial references.
 
 | Matrix | N | NNZ | CG iterations | True relative residual | Median solve time (s) | Notes |
 |---|---:|---:|---:|---:|---:|---|
@@ -488,13 +490,13 @@ Results below are **medians of 10 measured solver-only runs, following four unti
 | 36 | 0.9702 | 2.139× | 8.2717 | 4.422× |
 | 72 | 1.0397 | 1.996× | **7.1867** | **5.090×** |
 
-Serial-relative speedup is `T_serial / T_OpenMP(p)`. Parallel efficiency is defined **relative to the OpenMP 1-thread baseline** as `[T_OpenMP(1)/T_OpenMP(p)]/p`, and reaches **2.84%** (512²) versus **5.77%** (1024²) at 72 threads. The 512² problem performed best at 8 threads; the larger 1024² problem continued improving through 72 threads. These are **observations on these two jobs, not universal optimum thread counts**.
+Serial-relative speedup is `T_serial / T_OpenMP(p)`. Parallel efficiency is defined **relative to the OpenMP 1-thread baseline** as `T_OpenMP(1) / (p × T_OpenMP(p)) × 100` percent, and reaches **2.84%** (512²) versus **5.77%** (1024²) at 72 threads. The 512² problem performed best at 8 threads; the larger 1024² problem continued improving through 72 threads. These are **observations on these two jobs, not universal optimum thread counts**.
 
-![OpenMP speedup](docs/task_a/figures/openmp_speedup.png)
+![OpenMP speedup](docs/task_a/figures/revised/figure2_openmp_speedup.png)
 
-![OpenMP efficiency](docs/task_a/figures/openmp_efficiency.png)
+![OpenMP efficiency](docs/task_a/figures/revised/figure3_openmp_efficiency.png)
 
-![Median solve time by thread count](docs/task_a/figures/openmp_execution_time.png)
+![Median solve time by thread count](docs/task_a/figures/revised/figure1_openmp_execution_time.png)
 
 ### 9.6 Task 2 numerical validation and scheduling
 
@@ -502,13 +504,66 @@ The report's selected correctness dataset contains **54/54 converged measured so
 
 Scheduling experiments compared `static`, `dynamic` and `guided`, including dynamic chunks 64, 256, 1024 and 4096. All **140/140** measured scheduling runs converged. Default dynamic scheduling was substantially slower in these experiments, but the final experiment's repeated static baseline grew from **0.992 s** at the start to **2.391 s** at the end (**2.410×**); consequently **fine-grained comparisons are confounded by within-job drift** and must not be presented as definitive policy rankings.
 
-![Scheduling experiment; log-scale time axis](docs/task_a/figures/openmp_scheduling.png)
+![Scheduling experiment; log-scale time axis](docs/task_a/figures/revised/figure4_openmp_scheduling.png)
 
 See [Person A report](REPORT_TASK_A.md), [tables](docs/task_a/benchmark_tables.md), and [methodology](docs/task_a/benchmark_methodology.md) for complete values, convergence evidence, job identifiers and limitations. Raw 88 CSVs, 10 PBS scripts and 10 logs are preserved in a separate local archive rather than committed wholesale.
 
 ### 9.7 Team-wide parallel evaluation (forthcoming)
 
 MPI and hybrid comparisons should use compatible matrices, numerical tolerance and timing boundaries. For MPI/hybrid timings, use the slowest rank's relevant solve elapsed time and account for MPI rank/thread allocations and communication. GPU OpenMP target offloading may be investigated **only if time permits**, as a separate optional extension; **no GPU implementation or speedups are claimed here**.
+
+### 9.8 Controlled serial size scaling (4 November 2026)
+
+On **4 November 2026**, NUS Vanda job **1517629.stdct-mgmt-02** measured seven serial configurations and one repeated 512² stability check on **GN-A40-076**, an Intel Xeon Platinum 8452Y host. One CPU was allocated and all solves were explicitly pinned to **CPU 37**. The CPU-only executable used **GCC 13.2.0, C++17, Release `-O3 -DNDEBUG`**, with four warmups and ten timed solves per configuration. All **80/80 measured solves converged** at true relative residual tolerance `1e-8`; iteration counts were constant within each configuration and solution errors were finite and nonnegative. Two serial regression tests passed before measurement.
+
+The serial and CPU OpenMP implementations use CSR matrices, deterministic 2D five-point and 3D seven-point Poisson generators, initial guess zero, and the manufactured solution `x*=1`, with `b=A*1`. Whole-solver timing excludes matrix construction and post-solve solution-error calculation, while including internal allocation, CSR validation and true-residual verification.
+
+| Matrix | N | NNZ | Iterations | Median solver time (s) |
+|---|---:|---:|---:|---:|
+| 2D 64² | 4,096 | 20,224 | 122 | 0.003590079 |
+| 2D 256² | 65,536 | 326,656 | 454 | 0.261928640 |
+| 2D 512² | 262,144 | 1,308,672 | 894 | 2.092506992 |
+| 2D 1024² | 1,048,576 | 5,238,784 | 1755 | 37.698564427 |
+| 3D 16³ | 4,096 | 27,136 | 41 | 0.001445311 |
+| 3D 40³ | 64,000 | 438,400 | 101 | 0.063721961 |
+| 3D 64³ | 262,144 | 1,810,432 | 158 | 0.546246890 |
+
+The final 512² median was **2.394537989 s**, compared with the initial **2.092506992 s**: **+14.4339%**. Both required 894 iterations. The initial measurement is used in the scaling curves; the end check is kept separate. This timing drift limits precise cross-size interpretation and does not establish a particular hardware cause. Iteration counts increase with grid size and differ by geometry, so runtime cannot be attributed to N or NNZ alone.
+
+The earlier OpenMP campaign retains its original same-job serial references: **2.0750694645 s for 512²** (CN-036, job 1471134) and **36.5814764085 s for 1024²** (CN-015, job 1471153). The November serial medians are separate measurements and must not replace these references. Serial-relative speedup is `T_serial / T_OpenMP(p)`. OpenMP efficiency (%) is `T_OpenMP(1) / (p × T_OpenMP(p)) × 100`, using one-thread OpenMP medians **2.128281793 s** and **29.867328169 s**, respectively.
+
+Across the three completed performance campaigns, **400/400 timed CG solves converged**: **180** in the earlier OpenMP strong-scaling campaigns (including their 20 serial-reference runs), **140** in OpenMP scheduling, and **80** in the new serial scaling campaign. They came from separate experiments and allocations. Warmups are excluded. The historical 54-run selected correctness table overlaps some scaling records and is not added to this total.
+
+![Figure 5. Serial runtime versus N; log-log axes.](docs/task_a/figures/revised/figure5_serial_runtime_vs_n.png)
+
+![Figure 6. Serial runtime versus NNZ; log-log axes.](docs/task_a/figures/revised/figure6_serial_runtime_vs_nnz.png)
+
+Both axes use base-10 logarithmic scales. Separate 2D and 3D curves contain only measured configurations; markers show medians of ten runs. PNG and SVG versions of all six figures are in [revised figures](docs/task_a/figures/revised/).
+
+### 9.9 Reproduce the controlled serial campaign
+
+The [PBS script](scripts/vanda/benchmark_serial_scaling.pbs) builds a fresh executable inside a unique campaign directory, runs the two serial regression tests, then executes the fixed shuffled order: **2D 512, 3D 16, 2D 1024, 3D 40, 2D 64, 3D 64, 2D 256, 2D 512 end check**. It requests `select=1:ncpus=1:mem=8gb`, one-hour walltime, queue `auto`, project `personal-e1536052`, and module `CMake/3.27.6-GCCcore-13.2.0`.
+
+The script assumes an existing source directory at `$HOME/scratch/DSA5208/conjugate-gradient` containing CMakeLists.txt, src/, include/ and tests/. It supports a standalone copy with no `.git` or scripts/vanda/ directory. Preserve LF line endings. Place a transferred copy at the project root and, when ready on Vanda, submit:
+
+```bash
+cd "$HOME/scratch/DSA5208/conjugate-gradient"
+qsub benchmark_serial_scaling.pbs
+```
+
+In a full Git checkout, submission from the same project root may instead use `qsub scripts/vanda/benchmark_serial_scaling.pbs`. The script performs the Release build and tests automatically; no existing build/ or historical results are overwritten. A representative invocation inside an allocated compute job is `run_serial_benchmark 2d 512 10 <new-output.csv> 4`; tolerance `1e-8` and iteration limit 10000 are fixed by the runner, not CLI flags.
+
+The [clean evidence archive](results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/) contains eight CSVs, metadata, execution order, recorded commands, source hashes and the executed PBS script. It excludes all build artifacts. Metadata retains the historical executable hash and build flags; without the original source snapshot or Git metadata, hashes alone cannot reconstruct the exact standalone source version. Absolute Vanda paths and the account/job identifiers are retained as provenance, not portable commands or credentials. The original downloaded campaign remains preserved locally.
+
+For local validation and figure reproduction (Python with matplotlib and Pillow; pandas/numpy additionally for the OpenMP plotter):
+
+```bash
+python scripts/analyze_serial_scaling.py --validate-only
+python scripts/analyze_serial_scaling.py
+python scripts/plot_task_a_report_figures.py
+```
+
+The first command is read-only. The other two regenerate only the documented revised outputs from saved data; none runs CG benchmarks. See the [serial summary](docs/task_a/consolidated/serial_scaling_summary.csv), [analysis and report captions](docs/task_a/serial_scaling_analysis.md), [OpenMP tables](docs/task_a/benchmark_tables.md), and [methodology](docs/task_a/benchmark_methodology.md).
 
 ## 10. Development Workflow
 
@@ -537,7 +592,7 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 5. Davis, T. A., and Hu, Y. (2011). *The University of Florida Sparse Matrix Collection.*
 6. SuiteSparse Matrix Collection, `Schmid/thermal2`: https://sparse.tamu.edu/Schmid/thermal2
 
-## 12. Current Project Status (24 October 2026)
+## 12. Current Project Status (Task A update: 4 November 2026)
 
 | Workstream | Status / evidence |
 |---|---|
@@ -548,6 +603,7 @@ git add -f -- results/serial_2d_64.csv results/serial_3d_16.csv results/serial_t
 | Task 2 numerical evidence | Selected cases **54/54 converged**, including 3D Poisson and `thermal2` |
 | Task 2 scaling and scheduling | 512² and 1024² **180/180** strong-scaling measurements converged; scheduling **140/140** converged |
 | Task 2 final build | **7/7 CTest tests passed** on CN-006, PBS job `1471910`, 21 Oct 2026 |
+| Task A serial size-scaling evidence | **Completed 4 November 2026**: 80/80 converged timed solves; six revised figures and clean campaign archive prepared for review; November additions are not yet committed |
 | Task A — Person A completion and integration | **COMPLETED**: Task 1 + Task 2, benchmarks, figures, README and `REPORT_TASK_A.md` merged directly into `main` (`c35e9d8`); no PR required |
 | MPI / hybrid | **Person B MPI complete (October 2026)**: row-partitioned MPI CG, distributed SpMV/dot, collective-safe solver, 10/10 CTest, MPI tests at 1/2/4 ranks, 512² and 1024² scaling (80/80 converged runs per size), PBS scripts, `REPORT_TASK_B.md`; hybrid remains Person C's work |
 | OpenMP GPU offload | **Optional extension if time permits**; not implemented or benchmarked; outside completed Task A scope |

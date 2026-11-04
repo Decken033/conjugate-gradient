@@ -1,0 +1,188 @@
+campaign_id=20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD
+started_utc=2026-11-04T02:23:46Z
+source_directory=/home/svu/e1536052/scratch/DSA5208/conjugate-gradient
+executed_script=/var/spool/pbs/mom_priv/jobs/1517629.stdct-mgmt-02.SC
+git_metadata=unavailable; source hashes identify this source copy
+pbs_job_id=1517629.stdct-mgmt-02
+hostname=GN-A40-076
+requested_resources=select=1:ncpus=1:mem=8gb; walltime=01:00:00
+pbs_ncpus=1
+pbs_np=not_exported
+host_logical_cpus=72
+available_before_binding=1
+allowed_cpu_list=37
+bound_cpu=37
+warmups=4
+timed_repetitions=10
+tolerance=1e-8
+max_iterations=10000
+initial_guess=0
+exact_solution=1
+rhs=A*1
+order=fixed shuffled permutation v1; final 512 repeat is separate
+
+--- CPU topology (logical CPU IDs, cores, sockets) ---
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        46 bits physical, 57 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               72
+On-line CPU(s) list:                  0-71
+Vendor ID:                            GenuineIntel
+Model name:                           Intel(R) Xeon(R) Platinum 8452Y
+CPU family:                           6
+Model:                                143
+Thread(s) per core:                   1
+Core(s) per socket:                   36
+Socket(s):                            2
+Stepping:                             8
+BogoMIPS:                             4000.00
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cat_l2 cdp_l3 cdp_l2 ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local split_lock_detect avx_vnni avx512_bf16 wbnoinvd dtherm ida arat pln pts hfi vnmi avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq la57 rdpid bus_lock_detect cldemote movdiri movdir64b enqcmd fsrm md_clear serialize tsxldtrk pconfig arch_lbr ibt amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities ibpb_exit_to_user
+Virtualization:                       VT-x
+L1d cache:                            3.4 MiB (72 instances)
+L1i cache:                            2.3 MiB (72 instances)
+L2 cache:                             144 MiB (72 instances)
+L3 cache:                             135 MiB (2 instances)
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70
+NUMA node1 CPU(s):                    1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          Not affected
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Not affected
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Not affected
+Vulnerability Spec rstack overflow:   Not affected
+Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:             Mitigation; Enhanced / Automatic IBRS; IBPB conditional; RSB filling; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                  Not affected
+Vulnerability Tsx async abort:        Not affected
+Vulnerability Vmscape:                Mitigation; IBPB before exit to userspace
+# The following is the parsable format, which can be fed to other
+# programs. Each different item in every column has an unique ID
+# starting usually from zero.
+# CPU,Core,Socket,Online
+0,0,0,Y
+1,1,1,Y
+2,2,0,Y
+3,3,1,Y
+4,4,0,Y
+5,5,1,Y
+6,6,0,Y
+7,7,1,Y
+8,8,0,Y
+9,9,1,Y
+10,10,0,Y
+11,11,1,Y
+12,12,0,Y
+13,13,1,Y
+14,14,0,Y
+15,15,1,Y
+16,16,0,Y
+17,17,1,Y
+18,18,0,Y
+19,19,1,Y
+20,20,0,Y
+21,21,1,Y
+22,22,0,Y
+23,23,1,Y
+24,24,0,Y
+25,25,1,Y
+26,26,0,Y
+27,27,1,Y
+28,28,0,Y
+29,29,1,Y
+30,30,0,Y
+31,31,1,Y
+32,32,0,Y
+33,33,1,Y
+34,34,0,Y
+35,35,1,Y
+36,36,0,Y
+37,37,1,Y
+38,38,0,Y
+39,39,1,Y
+40,40,0,Y
+41,41,1,Y
+42,42,0,Y
+43,43,1,Y
+44,44,0,Y
+45,45,1,Y
+46,46,0,Y
+47,47,1,Y
+48,48,0,Y
+49,49,1,Y
+50,50,0,Y
+51,51,1,Y
+52,52,0,Y
+53,53,1,Y
+54,54,0,Y
+55,55,1,Y
+56,56,0,Y
+57,57,1,Y
+58,58,0,Y
+59,59,1,Y
+60,60,0,Y
+61,61,1,Y
+62,62,0,Y
+63,63,1,Y
+64,64,0,Y
+65,65,1,Y
+66,66,0,Y
+67,67,1,Y
+68,68,0,Y
+69,69,1,Y
+70,70,0,Y
+71,71,1,Y
+
+--- Binding ---
+pid 276845's current affinity list: 37
+
+--- Modules ---
+Currently Loaded Modulefiles:
+ 1) GCCcore/13.2.0               6) cURL/8.3.0-GCCcore-13.2.0        
+ 2) ncurses/6.4-GCCcore-13.2.0   7) XZ/5.4.4-GCCcore-13.2.0          
+ 3) zlib/1.2.13-GCCcore-13.2.0   8) libarchive/3.7.2-GCCcore-13.2.0  
+ 4) bzip2/1.0.8-GCCcore-13.2.0   9) CMake/3.27.6-GCCcore-13.2.0      
+ 5) OpenSSL/1.1                 
+
+--- Compiler ---
+/app1/ebapps/arches/flat-avx2/software/GCCcore/13.2.0/bin/g++
+g++ (GCC) 13.2.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+cmake version 3.27.6
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+
+--- PBS nodefile slots ---
+      1 gn-a40-076.stdct.loc
+
+--- Release configuration ---
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_COMPILER:STRING=/app1/ebapps/arches/flat-avx2/software/GCCcore/13.2.0/bin/g++
+CMAKE_CXX_FLAGS:STRING=
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+
+--- Serial regression checks ---
+Internal ctest changing into directory: /home/svu/e1536052/scratch/DSA5208/conjugate-gradient/results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/build
+Test project /home/svu/e1536052/scratch/DSA5208/conjugate-gradient/results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/build
+    Start 5: serial_cg
+1/2 Test #5: serial_cg ........................   Passed    0.03 sec
+    Start 6: serial_benchmark
+2/2 Test #6: serial_benchmark .................   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.07 sec
+
+--- Executable SHA256 ---
+0af71487f0767f400f3463d806c4e2038f9c54ff945345b96a18d4256266597c  /home/svu/e1536052/scratch/DSA5208/conjugate-gradient/results/serial_scaling/20261104T022346Z_1517629.stdct-mgmt-02_EOF0kD/build/run_serial_benchmark
+status=complete
+exit_code=0
+finished_utc=2026-11-04T02:34:02Z

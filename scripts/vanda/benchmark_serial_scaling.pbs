@@ -6,8 +6,8 @@
 #PBS -l walltime=01:00:00
 #PBS -j oe
 
-# Submit from the synchronized Vanda repository:
-# qsub scripts/vanda/benchmark_serial_scaling.pbs
+# Place this script in the standalone Vanda source directory and submit there:
+# qsub benchmark_serial_scaling.pbs
 # Resource syntax/account/module follow the existing Task A PBS scripts.
 # One requested CPU is intentional; queue acceptance must be checked on Vanda.
 # No solver tolerance CLI flag exists: the runner fixes 1e-8 and 10000 iterations.
@@ -16,16 +16,27 @@ export LC_ALL=C
 export TZ=UTC
 umask 077
 : "${PBS_JOBID:?Submit this script through PBS on a compute node}"
+# Resolve the executing script before changing directories. Under PBS this can
+# be a spool copy; archive that exact script, not an assumed scripts/vanda path.
+script_path="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)/$(basename -- "${BASH_SOURCE[0]}")"
+[[ -r "$script_path" ]] || { echo "Cannot read executing PBS script" >&2; exit 1; }
 cd "$HOME/scratch/DSA5208/conjugate-gradient"
 repo=$PWD
 
 module purge
 module load CMake/3.27.6-GCCcore-13.2.0
-for tool in git cmake ctest g++ taskset lscpu nproc awk sha256sum mktemp; do
+for tool in cmake ctest g++ taskset lscpu nproc awk sha256sum mktemp; do
     command -v "$tool" >/dev/null || { echo "Missing tool: $tool" >&2; exit 1; }
 done
 export OMP_NUM_THREADS=1
 export OMP_DYNAMIC=FALSE
+
+# Standalone source copies are supported; do not discover an unrelated parent
+# repository. A .git file also supports genuine Git worktrees when available.
+git_commit=
+if [[ -e "$repo/.git" ]] && command -v git >/dev/null 2>&1; then
+    git_commit=$(git -C "$repo" rev-parse --verify HEAD 2>/dev/null) || git_commit=
+fi
 
 # Atomic creation prevents collisions and historical-result overwrites.
 safe_job=${PBS_JOBID//[^a-zA-Z0-9_.-]/_}
@@ -57,7 +68,12 @@ bound=$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status)
 
 {
     printf 'campaign_id=%s\nstarted_utc=%s\n' "${campaign##*/}" "$(date -u +%FT%TZ)"
-    printf 'repository=%s\ngit_commit=%s\n' "$repo" "$(git rev-parse HEAD)"
+    printf 'source_directory=%s\nexecuted_script=%s\n' "$repo" "$script_path"
+    if [[ -n "$git_commit" ]]; then
+        printf 'git_commit=%s\n' "$git_commit"
+    else
+        printf 'git_metadata=unavailable; source hashes identify this source copy\n'
+    fi
     printf 'pbs_job_id=%s\nhostname=%s\n' "$PBS_JOBID" "$(hostname)"
     printf 'requested_resources=select=1:ncpus=1:mem=8gb; walltime=01:00:00\n'
     printf 'pbs_ncpus=%s\npbs_np=%s\n' "${NCPUS:-not_exported}" "${PBS_NP:-not_exported}"
@@ -77,19 +93,26 @@ bound=$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status)
     command -v g++
     g++ --version
     cmake --version
-    printf '\n--- Working tree status ---\n'
-    git status --short
+    if [[ -n "$git_commit" ]]; then
+        printf '\n--- Working tree status ---\n'
+        git -C "$repo" status --short || printf 'Git status unavailable\n'
+    fi
 } > "$metadata"
 # PBS nodefile entries are slots, not necessarily physical cores.
 if [[ -n "${PBS_NODEFILE:-}" && -r "$PBS_NODEFILE" ]]; then
     { printf '\n--- PBS nodefile slots ---\n'; sort "$PBS_NODEFILE" | uniq -c; } >> "$metadata"
 fi
-# Preserve source identity even when the checkout contains uncommitted changes.
-git diff HEAD -- CMakeLists.txt include src/serial src/common tests > "$campaign/source_changes.patch"
+# Hash sources regardless of Git availability. The optional patch supplements
+# these fingerprints only when this directory is an actual Git checkout.
+if [[ -n "$git_commit" ]]; then
+    git -C "$repo" diff HEAD -- CMakeLists.txt include src/serial src/common tests > "$campaign/source_changes.patch" ||
+        printf 'git_diff=incomplete; consult source hashes\n' >> "$metadata"
+fi
 find include src/serial src/common tests -type f -print0 |
     sort -z | xargs -0 sha256sum > "$campaign/source_sha256.txt"
-sha256sum CMakeLists.txt scripts/vanda/benchmark_serial_scaling.pbs >> "$campaign/source_sha256.txt"
-cp scripts/vanda/benchmark_serial_scaling.pbs "$campaign/campaign.pbs"
+sha256sum CMakeLists.txt >> "$campaign/source_sha256.txt"
+cp -- "$script_path" "$campaign/campaign.pbs"
+sha256sum "$campaign/campaign.pbs" >> "$campaign/source_sha256.txt"
 printf '# Recorded commands; audit record, not a resubmission script.\n' > "$commands"
 record_command() { printf '%q ' "$@" >> "$commands"; printf '\n' >> "$commands"; }
 
