@@ -1,0 +1,172 @@
+#!/bin/bash
+#PBS -N dsa5208_serial
+#PBS -P personal-e1536052
+#PBS -q auto
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+# Submit from the synchronized Vanda repository:
+# qsub scripts/vanda/benchmark_serial_scaling.pbs
+# Resource syntax/account/module follow the existing Task A PBS scripts.
+# One requested CPU is intentional; queue acceptance must be checked on Vanda.
+# No solver tolerance CLI flag exists: the runner fixes 1e-8 and 10000 iterations.
+set -euo pipefail
+export LC_ALL=C
+export TZ=UTC
+umask 077
+: "${PBS_JOBID:?Submit this script through PBS on a compute node}"
+cd "$HOME/scratch/DSA5208/conjugate-gradient"
+repo=$PWD
+
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+for tool in git cmake ctest g++ taskset lscpu nproc awk sha256sum mktemp; do
+    command -v "$tool" >/dev/null || { echo "Missing tool: $tool" >&2; exit 1; }
+done
+export OMP_NUM_THREADS=1
+export OMP_DYNAMIC=FALSE
+
+# Atomic creation prevents collisions and historical-result overwrites.
+safe_job=${PBS_JOBID//[^a-zA-Z0-9_.-]/_}
+mkdir -p results/serial_scaling
+campaign=$(mktemp -d "$repo/results/serial_scaling/$(date -u +%Y%m%dT%H%M%SZ)_${safe_job}_XXXXXX")
+build="$campaign/build"
+metadata="$campaign/metadata.txt"
+commands="$campaign/commands.sh"
+mkdir "$build"
+on_exit() {
+    local code=$?
+    trap - EXIT
+    printf 'exit_code=%s\nfinished_utc=%s\n' "$code" "$(date -u +%FT%TZ)" >> "$metadata"
+    if (( code != 0 )); then
+        echo "Campaign FAILED; retain partial outputs for diagnosis: $campaign" >&2
+    fi
+    exit "$code"
+}
+trap on_exit EXIT
+
+# Read the kernel's effective allowed mask; never assume CPU 0 is allocated.
+allowed=$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status)
+cpu=${allowed%%[,-]*}
+[[ "$cpu" =~ ^[0-9]+$ ]] || { echo "Invalid allowed CPU list: $allowed" >&2; exit 1; }
+available=$(env -u OMP_NUM_THREADS -u OMP_THREAD_LIMIT nproc)
+taskset -pc "$cpu" "$$" > "$build/binding.log"
+bound=$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status)
+[[ "$bound" == "$cpu" ]] || { echo "Single-CPU binding failed" >&2; exit 1; }
+
+{
+    printf 'campaign_id=%s\nstarted_utc=%s\n' "${campaign##*/}" "$(date -u +%FT%TZ)"
+    printf 'repository=%s\ngit_commit=%s\n' "$repo" "$(git rev-parse HEAD)"
+    printf 'pbs_job_id=%s\nhostname=%s\n' "$PBS_JOBID" "$(hostname)"
+    printf 'requested_resources=select=1:ncpus=1:mem=8gb; walltime=01:00:00\n'
+    printf 'pbs_ncpus=%s\npbs_np=%s\n' "${NCPUS:-not_exported}" "${PBS_NP:-not_exported}"
+    printf 'host_logical_cpus=%s\navailable_before_binding=%s\n' "$(nproc --all)" "$available"
+    printf 'allowed_cpu_list=%s\nbound_cpu=%s\n' "$allowed" "$bound"
+    printf 'warmups=4\ntimed_repetitions=10\ntolerance=1e-8\nmax_iterations=10000\n'
+    printf 'initial_guess=0\nexact_solution=1\nrhs=A*1\n'
+    printf 'order=fixed shuffled permutation v1; final 512 repeat is separate\n'
+    printf '\n--- CPU topology (logical CPU IDs, cores, sockets) ---\n'
+    lscpu
+    lscpu -p=CPU,CORE,SOCKET,ONLINE
+    printf '\n--- Binding ---\n'
+    taskset -pc "$$"
+    printf '\n--- Modules ---\n'
+    module list 2>&1
+    printf '\n--- Compiler ---\n'
+    command -v g++
+    g++ --version
+    cmake --version
+    printf '\n--- Working tree status ---\n'
+    git status --short
+} > "$metadata"
+# PBS nodefile entries are slots, not necessarily physical cores.
+if [[ -n "${PBS_NODEFILE:-}" && -r "$PBS_NODEFILE" ]]; then
+    { printf '\n--- PBS nodefile slots ---\n'; sort "$PBS_NODEFILE" | uniq -c; } >> "$metadata"
+fi
+# Preserve source identity even when the checkout contains uncommitted changes.
+git diff HEAD -- CMakeLists.txt include src/serial src/common tests > "$campaign/source_changes.patch"
+find include src/serial src/common tests -type f -print0 |
+    sort -z | xargs -0 sha256sum > "$campaign/source_sha256.txt"
+sha256sum CMakeLists.txt scripts/vanda/benchmark_serial_scaling.pbs >> "$campaign/source_sha256.txt"
+cp scripts/vanda/benchmark_serial_scaling.pbs "$campaign/campaign.pbs"
+printf '# Recorded commands; audit record, not a resubmission script.\n' > "$commands"
+record_command() { printf '%q ' "$@" >> "$commands"; printf '\n' >> "$commands"; }
+
+# Fresh build, explicit compiler and optimization; no pre-existing binary reuse.
+[[ "$(g++ -dumpfullversion)" == 13.2.0 ]] || {
+    echo "Expected GCC 13.2.0 after module loading; inspect metadata" >&2; exit 1;
+}
+configure=(cmake -S "$repo" -B "$build" -G 'Unix Makefiles'
+    -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=OFF -DBUILD_TESTING=ON
+    "-DCMAKE_CXX_COMPILER=$(command -v g++)"
+    -DCMAKE_CXX_FLAGS= '-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG'
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+record_command "${configure[@]}"
+"${configure[@]}" > "$build/configure.log" 2>&1
+compile=(cmake --build "$build" --parallel 1 --target
+    run_serial_benchmark test_serial_cg test_serial_benchmark)
+record_command "${compile[@]}"
+"${compile[@]}" > "$build/build.log" 2>&1
+verify=(ctest --test-dir "$build" --output-on-failure --no-tests=error -R '^(serial_cg|serial_benchmark)$')
+record_command "${verify[@]}"
+"${verify[@]}" > "$build/verification.log" 2>&1
+{
+    printf '\n--- Release configuration ---\n'
+    grep -E '^CMAKE_(BUILD_TYPE|CXX_COMPILER|CXX_FLAGS|CXX_FLAGS_RELEASE):' "$build/CMakeCache.txt"
+    printf '\n--- Serial regression checks ---\n'
+    cat "$build/verification.log"
+    printf '\n--- Executable SHA256 ---\n'
+    sha256sum "$build/run_serial_benchmark"
+} >> "$metadata"
+
+# Literal permutation is reproducible without shell/platform PRNG differences.
+# Starting with 512 gives a direct start/end drift comparison.
+workloads=('2d 512' '3d 16' '2d 1024' '3d 40' '2d 64' '3d 64' '2d 256' '2d 512')
+printf 'sequence,geometry,grid_size,n,nnz,role,output_csv\n' > "$campaign/execution_order.csv"
+for i in "${!workloads[@]}"; do
+    read -r geometry grid <<< "${workloads[$i]}"
+    role=core
+    suffix=
+    if (( i == 7 )); then role=drift_check; suffix=_endcheck; fi
+    filename="serial_${geometry}_${grid}${suffix}.csv"
+    if [[ "$geometry" == 2d ]]; then
+        n=$((grid * grid)); nnz=$((5 * n - 4 * grid))
+    else
+        n=$((grid * grid * grid)); nnz=$((7 * n - 6 * grid * grid))
+    fi
+    printf '%s,%s,%s,%s,%s,%s,%s\n' "$((i + 1))" "$geometry" "$grid" "$n" "$nnz" "$role" "$filename" >> "$campaign/execution_order.csv"
+done
+
+for i in "${!workloads[@]}"; do
+    read -r geometry grid <<< "${workloads[$i]}"
+    suffix=
+    if (( i == 7 )); then suffix=_endcheck; fi
+    output="$campaign/serial_${geometry}_${grid}${suffix}.csv"
+    [[ ! -e "$output" ]] || { echo "Refusing to overwrite $output" >&2; exit 1; }
+    run=(taskset -c "$cpu" "$build/run_serial_benchmark" "$geometry" "$grid" 10 "$output" 4)
+    record_command "${run[@]}"
+    printf 'Starting %s %s (%s/8)\n' "$geometry" "$grid" "$((i + 1))"
+    # Keep structured measurements; suppress repetitive successful progress text.
+    # Errors remain in the PBS output. Build diagnostics stay under build/.
+    "${run[@]}" > /dev/null
+    # Validate the preserved schema, count, dimensions and numerical success.
+    awk -F, -v geometry="$geometry" -v grid="$grid" '
+        BEGIN {
+            expected="solver,matrix_name,n,nnz,ranks,threads,run_index,iterations,converged,solve_seconds,true_relative_residual,relative_solution_error"
+            n=(geometry=="2d" ? grid^2 : grid^3)
+            nnz=(geometry=="2d" ? 5*n-4*grid : 7*n-6*grid^2)
+        }
+        NR==1 { if ($0 != expected) bad=1; next }
+        { if (NF!=12 || $1!="serial" || $2!="poisson_" geometry "_" grid ||
+              $3!=n || $4!=nnz || $5!=1 || $6!=1 || $7!=NR-1 ||
+              $8<1 || $8>10000 || $9!=1 || $10<=0 || $11<0 || $11>1e-8 ||
+              $12<0 || tolower($0) ~ /nan|inf/) bad=1 }
+        END { exit (bad || NR!=11) }
+    ' "$output"
+done
+printf 'status=complete\n' >> "$metadata"
+echo "Completed: $campaign"
+# Final-report inputs: eight CSVs, execution_order.csv, and concise metadata.
+# Keep build/ logs/cache/compile_commands and source fingerprints as provenance,
+# not as raw terminal-log appendices in the final report.
