@@ -1,0 +1,5 @@
+schedule,chunk_size,mean_seconds,median_seconds,repeats,ranks,threads_per_rank,grid_size
+static_run1,0,0.022492,0.0219383,5,2,4,64
+static_run2,0,0.019432,0.0194771,5,2,4,64
+dynamic,0,0.0276958,0.0276961,5,2,4,64
+guided,4,0.021496,0.0189375,5,2,4,64
