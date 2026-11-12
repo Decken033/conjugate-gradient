@@ -1,4 +1,4 @@
-﻿#include "gpu_benchmark.hpp"
+﻿#include "gpu/gpu_benchmark.hpp"
 
 #include <fstream>
 #include <iomanip>

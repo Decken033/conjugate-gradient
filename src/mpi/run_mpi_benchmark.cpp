@@ -24,13 +24,14 @@
  *   - Timing uses MPI_Wtime and MPI_Reduce(MPI_MAX)
  */
 
-#include "mpi_benchmark.hpp"
-#include "mpi_partition.hpp"
-#include "mpi_solver.hpp"
-#include "csr_matrix.hpp"
-#include "cg_solver.hpp"
-#include "poisson.hpp"
-#include "matrix_market.hpp"
+#include "mpi/mpi_benchmark.hpp"
+#include "common/ops_profiler.hpp"
+#include "mpi/mpi_partition.hpp"
+#include "mpi/mpi_solver.hpp"
+#include "common/csr_matrix.hpp"
+#include "serial/cg_solver.hpp"
+#include "common/poisson.hpp"
+#include "common/matrix_market.hpp"
 
 #include <mpi.h>
 #include <algorithm>
@@ -184,6 +185,8 @@ int main(int argc, char* argv[]) {
             warmups,
             MPI_COMM_WORLD
         );
+
+        cg::write_ops_profile_csv(cg::process_ops_profile, output_csv + ".profile.rank" + std::to_string(rank) + ".csv", "mpi", rank, num_ranks, 1);
 
         // Write CSV (rank 0 only)
         if (rank == 0) {

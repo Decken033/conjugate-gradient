@@ -12,8 +12,9 @@
  * Wall-clock timing uses C++17 std::chrono::steady_clock.
  */
 
-#include "openmp_benchmark.hpp"
-#include "openmp_solver.hpp"
+#include "openmp/openmp_benchmark.hpp"
+#include "openmp/openmp_solver.hpp"
+#include "common/ops_profiler.hpp"
 
 #include <omp.h>
 
@@ -116,6 +117,8 @@ std::vector<OpenMPBenchmarkRecord> benchmark_openmp_cg(
     using Clock = std::chrono::steady_clock;
 
 
+    process_ops_profile.reset();
+
     // All warm-up solves are excluded from measurements.
     // Use identical warm-up methodology for serial and OpenMP.
     for (std::size_t warmup_index = 0;
@@ -164,9 +167,12 @@ std::vector<OpenMPBenchmarkRecord> benchmark_openmp_cg(
         // Only the complete OpenMP CG solver is timed.
         const auto start = Clock::now();
 
-        auto result = solve_openmp_cg(
-            A, b, options, omp_options
-        );
+        CGResult result;
+        {
+            ProfileSession profile_session(process_ops_profile);
+            ProfileScope solver_timer(ProfileSection::SolverTotal);
+            result = solve_openmp_cg(A, b, options, omp_options);
+        }
 
         const auto stop = Clock::now();
 

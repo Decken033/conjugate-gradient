@@ -1,0 +1,11 @@
+solver,rank,ranks,threads,operation,calls,total_seconds,avg_seconds
+openmp,0,1,8,spmv_allgatherv,0,0,0
+openmp,0,1,8,spmv_compute,8950,3.6768187729999977,0.00041081773999999976
+openmp,0,1,8,dot_compute,17910,0.8014400009999979,4.4748185427135559e-05
+openmp,0,1,8,mpi_allreduce,0,0,0
+openmp,0,1,8,solution_residual_update,8940,0.90582181500000158,0.00010132235067114112
+openmp,0,1,8,direction_update,8930,0.27247390199999949,3.0512195072788298e-05
+openmp,0,1,8,true_residual_subtract,10,0.0010862620000000002,0.00010862620000000001
+openmp,0,1,8,collective_check,0,0,0
+openmp,0,1,8,solver_total,10,13.476461890000001,1.3476461890000002
+openmp,0,1,8,other_uninstrumented,1,7.818821137000004,7.818821137000004

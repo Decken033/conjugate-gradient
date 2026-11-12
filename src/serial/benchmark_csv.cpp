@@ -11,7 +11,7 @@
  * with OpenMP, MPI, and hybrid CG implementations.
  */
 
-#include "serial_benchmark.hpp"
+#include "serial/serial_benchmark.hpp"
 
 #include <fstream>
 #include <iomanip>

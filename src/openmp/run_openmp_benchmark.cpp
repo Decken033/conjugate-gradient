@@ -18,10 +18,11 @@
  * the measured solver execution time.
  */
 
-#include "poisson.hpp"
-#include "matrix_market.hpp"
-#include "csr_ops.hpp"
-#include "openmp_benchmark.hpp"
+#include "common/poisson.hpp"
+#include "common/matrix_market.hpp"
+#include "common/csr_ops.hpp"
+#include "openmp/openmp_benchmark.hpp"
+#include "common/ops_profiler.hpp"
 
 #include <cctype>
 #include <exception>
@@ -203,6 +204,8 @@ int main(int argc, char* argv[]) {
             omp_options,
             warmups
         );
+
+        cg::write_ops_profile_csv(cg::process_ops_profile, output_path + ".profile.csv", "openmp", 0, 1, threads);
 
         // CSV I/O is outside all measured runs.
         cg::write_openmp_benchmark_csv(

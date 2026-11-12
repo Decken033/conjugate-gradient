@@ -1,5 +1,5 @@
 
-#include "mpi_partition.hpp"
+#include "mpi/mpi_partition.hpp"
 
 #include <algorithm>
 #include <stdexcept>

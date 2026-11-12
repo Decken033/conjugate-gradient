@@ -11,10 +11,10 @@ Files:
 - `run_mpi_benchmark.cpp` — command-line benchmark runner
 
 Public interfaces are in the top-level `include/` directory:
-- `include/mpi_partition.hpp`
-- `include/mpi_ops.hpp`
-- `include/mpi_solver.hpp`
-- `include/mpi_benchmark.hpp`
+- `include/mpi/mpi_partition.hpp`
+- `include/mpi/mpi_ops.hpp`
+- `include/mpi/mpi_solver.hpp`
+- `include/mpi/mpi_benchmark.hpp`
 
 Tests are in the top-level `tests/` directory:
 - `tests/test_mpi_partition.cpp`

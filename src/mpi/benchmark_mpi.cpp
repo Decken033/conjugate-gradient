@@ -1,7 +1,8 @@
 
-#include "mpi_benchmark.hpp"
-#include "mpi_solver.hpp"
-#include "mpi_ops.hpp"
+#include "mpi/mpi_benchmark.hpp"
+#include "mpi/mpi_solver.hpp"
+#include "mpi/mpi_ops.hpp"
+#include "common/ops_profiler.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -49,6 +50,8 @@ std::vector<MPIBenchmarkRecord> benchmark_mpi_cg(
     MPI_Allreduce(&local_nnz, &global_nnz, 1, MPI_UNSIGNED_LONG,
                   MPI_SUM, comm);
 
+    process_ops_profile.reset();
+
     // Run untimed warmups (all ranks participate)
     for (std::size_t w = 0; w < warmups; ++w) {
         if (rank == 0) {
@@ -77,7 +80,12 @@ std::vector<MPIBenchmarkRecord> benchmark_mpi_cg(
         MPI_Barrier(comm);
 
         const double t_start = MPI_Wtime();
-        auto cg_result = solve_mpi_cg(A, b_local, options, comm);
+        MPICGResult cg_result;
+        {
+            ProfileSession profile_session(process_ops_profile);
+            ProfileScope solver_timer(ProfileSection::SolverTotal);
+            cg_result = solve_mpi_cg(A, b_local, options, comm);
+        }
         const double t_end = MPI_Wtime();
 
         const double local_elapsed = t_end - t_start;

@@ -24,8 +24,8 @@
  * checks storage structure, not mathematical SPD.
  */
 
-#include "cg_solver.hpp"
-#include "csr_ops.hpp"
+#include "serial/cg_solver.hpp"
+#include "common/csr_ops.hpp"
 
 #include <cmath>
 #include <stdexcept>

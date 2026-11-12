@@ -1,7 +1,7 @@
-﻿#include "gpu_benchmark.hpp"
-#include "poisson.hpp"
-#include "matrix_market.hpp"
-#include "csr_ops.hpp"
+﻿#include "gpu/gpu_benchmark.hpp"
+#include "common/poisson.hpp"
+#include "common/matrix_market.hpp"
+#include "common/csr_ops.hpp"
 
 #include <cctype>
 #include <exception>

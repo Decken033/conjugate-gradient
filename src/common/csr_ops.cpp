@@ -1,7 +1,7 @@
 
 // Sparse matrix-vector multiplication (SpMV)
 
-#include "csr_ops.hpp"
+#include "common/csr_ops.hpp"
 
 #include <stdexcept>
 

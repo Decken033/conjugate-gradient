@@ -14,8 +14,8 @@
  * Shewchuk (1994).
  */
 
-#include "openmp_solver.hpp"
-#include "openmp_ops.hpp"
+#include "openmp/openmp_solver.hpp"
+#include "openmp/openmp_ops.hpp"
 
 #include <cmath>
 #include <stdexcept>

@@ -1,5 +1,5 @@
-
-#include "mpi_ops.hpp"
+#include "mpi/mpi_ops.hpp"
+#include "common/ops_profiler.hpp"
 
 #include <cmath>
 #include <limits>
@@ -62,11 +62,14 @@ std::vector<double> mpi_csr_matvec(
     // For square matrices: global_rows == global_cols
     std::vector<double> x_global(A.global_rows);
 
+    {
+    ProfileScope timer(ProfileSection::SpmvAllgatherv);
     MPI_Allgatherv(
         x_local.data(), static_cast<int>(x_local.size()), MPI_DOUBLE,
         x_global.data(), recvcounts.data(), displs.data(), MPI_DOUBLE,
         comm
     );
+    }
 
     // Compute local portion of y = A * x
     // Uses global column indices from local CSR
@@ -75,6 +78,8 @@ std::vector<double> mpi_csr_matvec(
 
     const auto& mat = A.local_matrix;
 
+    {
+    ProfileScope timer(ProfileSection::SpmvCompute);
     for (std::size_t i = 0; i < n_local; ++i) {
         double sum = 0.0;
         const std::size_t row_begin = mat.row_ptr[i];
@@ -86,6 +91,7 @@ std::vector<double> mpi_csr_matvec(
         }
 
         y_local[i] = sum;
+    }
     }
 
     return y_local;
@@ -104,13 +110,18 @@ double mpi_dot(
 
     // Local partial sum
     double local_sum = 0.0;
+    {
+    ProfileScope timer(ProfileSection::DotCompute);
     for (std::size_t i = 0; i < a_local.size(); ++i) {
         local_sum += a_local[i] * b_local[i];
+    }
     }
 
     // Global sum via Allreduce (all ranks receive the result)
     double global_sum = 0.0;
+    { ProfileScope timer(ProfileSection::Allreduce);
     MPI_Allreduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, comm);
+    }
 
     return global_sum;
 }
@@ -152,6 +163,7 @@ void mpi_update_solution_residual(
         );
     }
 
+    ProfileScope timer(ProfileSection::SolutionResidualUpdate);
     for (std::size_t i = 0; i < x_local.size(); ++i) {
         x_local[i] += alpha * p_local[i];
         r_local[i] -= alpha * Ap_local[i];
@@ -169,6 +181,7 @@ void mpi_update_direction(
         );
     }
 
+    ProfileScope timer(ProfileSection::DirectionUpdate);
     for (std::size_t i = 0; i < p_local.size(); ++i) {
         p_local[i] = r_local[i] + beta * p_local[i];
     }
@@ -185,6 +198,7 @@ std::vector<double> mpi_true_residual(
 
     // Compute r_true_local = b_local - Ax_local
     std::vector<double> r_local(b_local.size());
+    ProfileScope timer(ProfileSection::ResidualSubtract);
     for (std::size_t i = 0; i < b_local.size(); ++i) {
         r_local[i] = b_local[i] - Ax_local[i];
     }

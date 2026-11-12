@@ -1,5 +1,5 @@
 
-#include "matrix_market.hpp"
+#include "common/matrix_market.hpp"
 
 #include <algorithm>
 #include <cmath>

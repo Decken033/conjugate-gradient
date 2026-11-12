@@ -9,7 +9,7 @@
  * CSV writing is performed outside all timed regions.
  */
 
-#include "openmp_benchmark.hpp"
+#include "openmp/openmp_benchmark.hpp"
 
 #include <fstream>
 #include <iomanip>

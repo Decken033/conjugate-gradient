@@ -1,6 +1,6 @@
-﻿#include "gpu_benchmark.hpp"
-#include "gpu_solver.hpp"
-#include "csr_ops.hpp"
+﻿#include "gpu/gpu_benchmark.hpp"
+#include "gpu/gpu_solver.hpp"
+#include "common/csr_ops.hpp"
 
 #include <chrono>
 #include <cmath>

@@ -18,10 +18,10 @@
  * one untimed warm-up before the measured repetitions.
  */
 
-#include "poisson.hpp"
-#include "matrix_market.hpp"
-#include "csr_ops.hpp"
-#include "serial_benchmark.hpp"
+#include "common/poisson.hpp"
+#include "common/matrix_market.hpp"
+#include "common/csr_ops.hpp"
+#include "serial/serial_benchmark.hpp"
 
 #include <cctype>
 #include <exception>

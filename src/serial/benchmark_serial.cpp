@@ -16,7 +16,7 @@
  * Wall-clock timing uses C++17 std::chrono::steady_clock.
  */
 
-#include "serial_benchmark.hpp"
+#include "serial/serial_benchmark.hpp"
 
 #include <chrono>
 #include <cmath>

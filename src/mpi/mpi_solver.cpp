@@ -30,7 +30,8 @@
  *    restart from the true residual. All ranks take identical path.
  */
 
-#include "mpi_solver.hpp"
+#include "common/ops_profiler.hpp"
+#include "mpi/mpi_solver.hpp"
 
 #include <cmath>
 #include <stdexcept>
@@ -45,6 +46,7 @@ namespace {
 void collective_check(int local_error, MPI_Comm comm,
                       const char* message)
 {
+    ProfileScope timer(ProfileSection::CollectiveCheck);
     int global_error = 0;
     MPI_Allreduce(&local_error, &global_error, 1, MPI_INT, MPI_MAX, comm);
     if (global_error) {

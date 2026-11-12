@@ -1,5 +1,6 @@
 
-#include "openmp_ops.hpp"
+#include "openmp/openmp_ops.hpp"
+#include "common/ops_profiler.hpp"
 
 #include <omp.h>
 
@@ -39,6 +40,7 @@ std::vector<double> csr_matvec_openmp(
         : options.num_threads;
 
     std::vector<double> y(A.rows, 0.0);
+    ProfileScope timer(ProfileSection::SpmvCompute);
 
     // Each row is independent:
     // - A and x are shared and read-only.
@@ -146,6 +148,7 @@ double dot_openmp(
         : options.num_threads;
 
     double sum = 0.0;
+    ProfileScope timer(ProfileSection::DotCompute);
 
     // Static scheduling is used for this reduction.
     // Scheduling comparisons initially focus on CSR SpMV.
@@ -195,6 +198,7 @@ void update_solution_residual_openmp(
         : options.num_threads;
 
     // Static scheduling: equal work per vector element.
+    ProfileScope timer(ProfileSection::SolutionResidualUpdate);
     #pragma omp parallel for schedule(static) num_threads(threads)
     for (std::size_t i = 0; i < n; ++i) {
         x[i] += alpha * p[i];
@@ -236,6 +240,7 @@ void update_direction_openmp(
         : options.num_threads;
 
     // Static scheduling: equal work per vector element.
+    ProfileScope timer(ProfileSection::DirectionUpdate);
     #pragma omp parallel for schedule(static) num_threads(threads)
     for (std::size_t i = 0; i < n; ++i) {
         p[i] = r[i] + beta * p[i];
@@ -275,6 +280,7 @@ std::vector<double> subtract_openmp(
         : options.num_threads;
 
     std::vector<double> residual(n, 0.0);
+    ProfileScope timer(ProfileSection::ResidualSubtract);
 
     // Static scheduling: independent element-wise subtraction.
     #pragma omp parallel for schedule(static) num_threads(threads)

@@ -18,7 +18,7 @@
  * Only rank 0 should call this function.
  */
 
-#include "mpi_benchmark.hpp"
+#include "mpi/mpi_benchmark.hpp"
 
 #include <fstream>
 #include <iomanip>

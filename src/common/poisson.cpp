@@ -1,5 +1,5 @@
 
-#include "poisson.hpp"
+#include "common/poisson.hpp"
 
 #include <limits>
 #include <stdexcept>
