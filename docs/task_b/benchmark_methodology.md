@@ -27,7 +27,7 @@ MPI_Reduce(&local_elapsed, &max_elapsed, 1, MPI_DOUBLE, MPI_MAX, 0, comm);
 
 ### Warmup protocol
 
-The benchmark runner defaults to one warmup. The selected 2D Poisson, thermal2, 3D, and new 256-rank PBS logs record four warmups and ten timed runs per configuration. The 3D submitted script is unavailable; `scripts/vanda/benchmark_mpi_3d_reproduce.pbs` is a reproduction proposal, not the historical submission.
+The benchmark runner defaults to one warmup. The selected 2D Poisson, thermal2, 3D, and new 256-rank PBS logs record four warmups and ten timed runs per configuration. A recovered historical 3D PBS snapshot is archived at `docs/task_b/evidence/scripts/benchmark_mpi_scaling_3d.pbs`; its submission-time identity and exact byte content are not independently verifiable. `scripts/vanda/benchmark_mpi_3d_reproduce.pbs` is a separate reproduction proposal, not the historical submission.
 
 ### Reported statistics
 
@@ -106,7 +106,7 @@ mpi_2d<size>_p<ranks>_<JOBID>.csv
 
 The thermal2 job uses `results/mpi/thermal2/thermal2_p<ranks>_<JOBID>.csv`. Record job ID, allocation, module versions, and process mapping when available; the retained logs do not provide the latter.
 
-The 3D results use `results/mpi/3d/mpi_3d<size>_p<ranks>_1502451.stdct-mgmt-02.csv`. The recovered `dsa5208_mpi_scaling_3d.o1502451` records its allocation, software versions, warmups, launch sequence, and completion; the historical submitted script, exact launch flags, process placement, build flags, and scheduler exit status remain unverified. The 3D reproduction PBS is a proposed rerun configuration only.
+The 3D results use `results/mpi/3d/mpi_3d<size>_p<ranks>_1502451.stdct-mgmt-02.csv`. The recovered `dsa5208_mpi_scaling_3d.o1502451` records its allocation, software versions, warmups, launch sequence, and completion. The recovered historical PBS snapshot records the requested resources and launch settings, but its submission-time identity, exact process placement, build provenance and scheduler exit status remain unverified. `scripts/vanda/benchmark_mpi_3d_reproduce.pbs` is a separate proposed rerun configuration.
 
 The new results are in `results/mpi/extension/strong_1509066.stdct-mgmt-02/` and `results/mpi/extension/weak_1509067.stdct-mgmt-02/`, with root-level PBS outputs `dsa5208_mpi_strong_256.o1509066` and `dsa5208_mpi_weak_256.o1509067`. Each output records eight allocated hosts with 36 slots each (288 slots), the CMake and Open MPI modules, core binding maps, all four warmups and ten timed solves per configuration, and a completion marker. The hostfiles retain eight hosts for each job. The strong and weak jobs ran in overlapping periods and had different host sets; they are separate baselines. Earlier jobs also differ in allocation and run conditions, so absolute times across jobs are not a controlled comparison. Neither CSV set has per-collective timings, so no communication fraction or causal attribution can be derived.
 
@@ -122,7 +122,7 @@ The extension adds 10 strong CSVs and 5 weak CSVs, each with ten timed records. 
 
 - Latest correctness job: 10/10 CTest targets passed; partition, SpMV, and CG executables each passed at 1, 2, and 4 ranks.
 - Scaling jobs: PBS `1482451.stdct-mgmt-02` (512²) and `1482491.stdct-mgmt-02` (1024²).
-- Full results and cross-node discussion: `REPORT_TASK_B.md` and `REPORT_TASK_B_ZH.md`.
+- Full results and cross-node discussion: `REPORT_TASK_B.md`.
 
 - Cross-solver comparisons with serial timing are omitted from the final tables; serial uses `std::chrono::steady_clock` while MPI uses `MPI_Wtime`.
 - MPI_Allgatherv replicates a full input vector on each rank; each rank contributes its local vector segment. Collective cost was not separately measured.

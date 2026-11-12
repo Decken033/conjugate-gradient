@@ -62,7 +62,7 @@ where \(A\) is a sparse SPD matrix. The serial implementation provides the teste
 - **Three automated test executables:** `test_mpi_partition`, `test_mpi_spmv`, `test_mpi_cg` covering partition correctness, SpMV vs serial reference, CG convergence, single-rank vs serial, and non-divisible partitions.
 - **PBS scripts:** `scripts/vanda/test_mpi_correctness.pbs`, `benchmark_mpi_scaling.pbs`, `benchmark_mpi_scaling_1024.pbs`.
 
-**Person B reports:** [English](REPORT_TASK_B.md) and [Chinese](REPORT_TASK_B_ZH.md) — design, algorithm, benchmark methodology, reproduction instructions, correctness evidence and 512²/1024² scaling results. They include mean solver times, speedups, efficiencies and a [scaling figure](docs/task_b/mpi_scaling.svg) derived from the selected CSV records.
+**Person B report:** [English](REPORT_TASK_B.md) — design, algorithm, benchmark methodology, reproduction instructions, correctness evidence and 512²/1024² scaling results. It includes mean solver times, speedups, efficiencies and a [scaling figure](docs/task_b/mpi_scaling.svg) derived from the selected CSV records.
 
 **Shared interfaces:** `cg::CSRMatrix`, `cg::csr_matvec`, `cg::make_poisson_2d`, `cg::make_poisson_3d` and `cg::load_matrix_market` can be reused by other solver implementations. For MPI, matrix partitioning and rank-wise distribution remain separate implementation work; every rank need not independently load the full matrix.
 

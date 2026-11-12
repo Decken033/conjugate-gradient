@@ -234,7 +234,7 @@ Across all 240 3D records, the maximum true relative residual is `9.893192e-09` 
 
 ### 7.6 Extended 2D strong scaling to 256 ranks — job 1509066
 
-This separate job held the 1024 x 1024 Poisson grid fixed (N = 1,048,576; NNZ = 5,238,784) and tested P = 1, 2, 4, 8, 16, 32, 36, 72, 144, 256. The retained PBS output records eight hosts with 36 slots each, Open MPI 4.1.6, a Release build request, core binding, four untimed warmups, ten timed solves per configuration, and a completion marker. All 100 CSV runs converged; every true relative residual is at most `1e-8` and every relative solution error is below `1e-4`. Values below derive from the ten slowest-rank solver times in each CSV. `S(P) = T(1)/T(P)` and `E(P) = S(P)/P`, where `T(1) = 28.855629833 s` is the **same job's** one-rank mean. SD is the sample SD. Time per iteration is `T(P)/1755`.
+This separate job held the 1024 x 1024 Poisson grid fixed (N = 1,048,576; NNZ = 5,238,784) and tested P = 1, 2, 4, 8, 16, 32, 36, 72, 144, 256. The recovered PBS script requests eight hosts with 36 slots each, a Release build, slot mapping and core binding. The retained PBS output confirms the Open MPI 4.1.6 environment, four untimed warmups, ten timed solves per configuration, and a completion marker; it does not independently echo the CMake build-type flag. All 100 CSV runs converged; every true relative residual is at most `1e-8` and every relative solution error is below `1e-4`. Values below derive from the ten slowest-rank solver times in each CSV. `S(P) = T(1)/T(P)` and `E(P) = S(P)/P`, where `T(1) = 28.855629833 s` is the **same job's** one-rank mean. SD is the sample SD. Time per iteration is `T(P)/1755`.
 
 **Table 9. Extended strong scaling; seconds unless stated otherwise.**
 

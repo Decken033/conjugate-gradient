@@ -37,7 +37,6 @@
 
 ### Top-level
 - `REPORT_TASK_B.md` — Complete English Person B technical report
-- `REPORT_TASK_B_ZH.md` — Complete Chinese counterpart
 - `mpi_scaling.svg` — Mean-time speedup and efficiency plot for both scaling workloads
 - `README.md` — Updated with Person B contribution and MPI build instructions
 - `CMakeLists.txt` — Added MPI targets with CG_ENABLE_MPI option
