@@ -77,3 +77,13 @@ results/gpu_evidence/*
 !results/gpu_evidence/*.pbs
 !results/gpu_evidence/CMakeCache.txt
 !results/gpu_evidence/dsa5208_gpu_scaling.o1518726
+
+# Standalone generated outputs and downloaded datasets (not historical archives).
+/task_a/results/
+/task_a/data/
+/task_b/results/
+/task_b/data/
+/task_c/handoff/results/
+/task_c/handoff/data/
+/task_c/v1_profile/results/
+/task_c/v1_profile/data/
