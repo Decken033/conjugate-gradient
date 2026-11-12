@@ -39,7 +39,7 @@ Canonical tracked logs are under `results/mpi/evidence/logs/`:
 - thermal2's log includes all five summaries but lacks a full job/time/allocation header and final completion marker. Warning prefixes are not a rank-placement map.
 - Optional-component library warnings are marked ignored; these are not warning-free logs. Historical scheduler accounting, submitted script hashes, per-job source/binary hashes and saved solution vectors are unavailable.
 
-The recovered code matched the audited pre-fix MPI implementation. Collective-safety source fixes and bounded tests have subsequently been prepared; see `docs/task_b/MPI_FIX_VALIDATION.md`. They have not been compiled or executed in this Windows session, and Vanda acceptance remains pending. Archiving evidence does NOT certify final correctness. Saved CSV residuals/convergence flags are recorded metrics, not independently reconstructed solutions.
+The recovered code matched the audited pre-fix MPI implementation. Collective-safety source fixes and bounded tests have subsequently been prepared. They have not been compiled or executed in this Windows session, and Vanda acceptance remains pending. Archiving evidence does NOT certify final correctness. Saved CSV residuals/convergence flags are recorded metrics, not independently reconstructed solutions.
 
 ## Derived results and checks
 
