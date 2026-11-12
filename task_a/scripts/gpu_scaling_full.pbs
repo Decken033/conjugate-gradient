@@ -1,0 +1,57 @@
+#!/bin/bash
+#PBS -N dsa5208_gpu_scaling
+#PBS -q auto
+#PBS -l select=1:ncpus=2:ngpus=1:mem=12gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${TASK_A_DIR:?Set TASK_A_DIR to the absolute task_a directory}"
+
+module load GCC/13.2.0
+module load NVHPC/24.7-CUDA-12.3.0
+
+export OMP_TARGET_OFFLOAD=MANDATORY
+
+build_dir="${BUILD_DIR:-$PWD/build-gpu}"
+output_dir="${OUTPUT_DIR:-$PWD/results/gpu_scaling}"
+mkdir -p "$output_dir"
+
+echo "=== GPU scaling campaign ==="
+date -Is
+hostname
+nvidia-smi --query-gpu=name,memory.total --format=csv
+
+run_case() {
+    local label="$1"
+    local matrix_type="$2"
+    local matrix_arg="$3"
+
+    echo "=== Starting ${label} ==="
+    date -Is
+
+    "$build_dir/run_gpu_benchmark" \
+        "$matrix_type" "$matrix_arg" \
+        10 "$output_dir/${label}.csv" 4
+
+    echo "=== Completed ${label} ==="
+    date -Is
+}
+
+run_case gpu_2d_64       2d 64
+run_case gpu_2d_256      2d 256
+run_case gpu_2d_512      2d 512
+run_case gpu_2d_1024     2d 1024
+
+run_case gpu_3d_16       3d 16
+run_case gpu_3d_40       3d 40
+run_case gpu_3d_64       3d 64
+
+run_case gpu_thermal2 thermal2 \
+    "${THERMAL2_PATH:-$PWD/data/suitesparse/thermal2/thermal2.mtx}"
+
+# Repeat a reference case to check timing drift.
+run_case gpu_2d_256_repeat 2d 256
+
+echo "=== GPU scaling campaign completed ==="
+date -Is

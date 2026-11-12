@@ -1,0 +1,44 @@
+#!/bin/bash
+#PBS -N dsa5208_omp1024
+# Supply your allocation account at submission: qsub -P ACCOUNT ...
+#PBS -q auto
+#PBS -l select=1:ncpus=72:mem=16gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+module load CMake/3.27.6-GCCcore-13.2.0
+cd "${TASK_A_DIR:?Set TASK_A_DIR to the absolute task_a directory}"
+
+export OMP_PROC_BIND=close
+export OMP_PLACES=cores
+export OMP_DYNAMIC=FALSE
+
+build_dir="${BUILD_DIR:-$PWD/build}"
+output_dir="${OUTPUT_DIR:-$PWD/results}"
+mkdir -p "$output_dir"
+
+echo "=== Benchmark environment ==="
+echo "Host: $(hostname)"
+echo "PBS job: $PBS_JOBID"
+taskset -pc $$
+
+lscpu | grep -E \
+'^Model name:|^CPU\(s\):|^Thread\(s\) per core:|^Core\(s\) per socket:|^Socket\(s\):|^NUMA node\(s\):'
+
+echo "=== Serial CG: Poisson 1024x1024 ==="
+
+"$build_dir/run_serial_benchmark" \
+    2d 1024 10 \
+    "$output_dir/serial_2d1024_scaling72.csv" 4
+
+for t in 1 2 4 8 16 32 36 72; do
+    echo "=== OpenMP ${t} threads: Poisson 1024x1024 ==="
+
+    "$build_dir/run_openmp_benchmark" \
+        2d 1024 "$t" static 0 10 \
+        "$output_dir/openmp_2d1024_scaling72_t${t}.csv" 4
+done
+
+echo "=== 1024x1024 scaling benchmark completed ==="
