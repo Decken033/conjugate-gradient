@@ -6,8 +6,22 @@
 #include <stdexcept>
 #include <vector>
 #include <cstddef>
+#include <exception>
 
 namespace cg {
+namespace {
+
+void agree_validation(std::exception_ptr error, MPI_Comm comm) {
+    int failed = error ? 1 : 0;
+    int any_failed = 0;
+    MPI_Allreduce(&failed, &any_failed, 1, MPI_INT, MPI_MAX, comm);
+    if (any_failed) {
+        if (error) std::rethrow_exception(error);
+        throw std::invalid_argument("MPI operation validation failed on another rank");
+    }
+}
+
+} // namespace
 
 std::vector<double> mpi_csr_matvec(
     const MPIPartitionedMatrix& A,
@@ -18,6 +32,25 @@ std::vector<double> mpi_csr_matvec(
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &num_ranks);
 
+    std::exception_ptr local_error;
+    try {
+    A.local_matrix.validate_structure();
+    if (A.partition_offsets.size() != static_cast<std::size_t>(num_ranks + 1) ||
+        A.row_start > A.row_end || A.row_end > A.global_rows) {
+        throw std::invalid_argument("MPI SpMV: invalid partition layout");
+    }
+    if (A.partition_offsets.front() != 0 ||
+        A.partition_offsets.back() != A.global_rows ||
+        A.row_start != A.partition_offsets[rank] ||
+        A.row_end != A.partition_offsets[rank + 1] ||
+        A.local_matrix.rows != A.local_rows()) {
+        throw std::invalid_argument("MPI SpMV: local rows don't match partition");
+    }
+    for (int r = 0; r < num_ranks; ++r) {
+        if (A.partition_offsets[r] > A.partition_offsets[r + 1]) {
+            throw std::invalid_argument("MPI SpMV: partition offsets are not nondecreasing");
+        }
+    }
     // For square matrices (CG requirement), global_rows == global_cols
     // and vectors are partitioned by rows.
     if (A.global_rows != A.global_cols) {
@@ -31,6 +64,17 @@ std::vector<double> mpi_csr_matvec(
             "MPI SpMV: x_local size doesn't match local rows"
         );
     }
+
+    if (A.local_matrix.cols != A.global_cols) {
+        throw std::invalid_argument("MPI SpMV: local column dimension mismatch");
+    }
+    if (A.global_rows > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+        throw std::overflow_error("MPI SpMV: vector exceeds int count limit");
+    }
+    } catch (...) {
+        local_error = std::current_exception();
+    }
+    agree_validation(local_error, comm);
 
     // Gather full x vector on all ranks using Allgatherv.
     //
@@ -49,12 +93,6 @@ std::vector<double> mpi_csr_matvec(
         const std::size_t r_rows =
             A.partition_offsets[r + 1] - A.partition_offsets[r];
         recvcounts[r] = static_cast<int>(r_rows);
-        if (A.partition_offsets[r] > static_cast<std::size_t>(
-                std::numeric_limits<int>::max())) {
-            throw std::overflow_error(
-                "MPI SpMV: partition offset exceeds int limit for Allgatherv"
-            );
-        }
         displs[r] = static_cast<int>(A.partition_offsets[r]);
     }
 
@@ -96,11 +134,12 @@ double mpi_dot(
     const std::vector<double>& b_local,
     MPI_Comm comm
 ) {
+    std::exception_ptr local_error;
     if (a_local.size() != b_local.size()) {
-        throw std::invalid_argument(
-            "MPI dot: local vector size mismatch"
-        );
+        local_error = std::make_exception_ptr(std::invalid_argument(
+            "MPI dot: local vector size mismatch"));
     }
+    agree_validation(local_error, comm);
 
     // Local partial sum
     double local_sum = 0.0;
@@ -180,6 +219,13 @@ std::vector<double> mpi_true_residual(
     const std::vector<double>& x_local,
     MPI_Comm comm
 ) {
+    std::exception_ptr local_error;
+    if (b_local.size() != A.local_rows()) {
+        local_error = std::make_exception_ptr(std::invalid_argument(
+            "MPI true residual: b_local size doesn't match local rows"));
+    }
+    agree_validation(local_error, comm);
+
     // Compute Ax in distributed manner
     std::vector<double> Ax_local = mpi_csr_matvec(A, x_local, comm);
 

@@ -1,0 +1,836 @@
+=== DSA5208 MPI CG 3D Strong Scaling ===
+Job ID: 1502451.stdct-mgmt-02
+Host: CN-033
+Start: Wed Oct 28 02:15:56 PM +08 2026
+Unloading shared
+  WARNING: Did not unuse /cm/shared/modulefiles
+Loading CMake/3.27.6-GCCcore-13.2.0
+  Loading requirement: GCCcore/13.2.0 ncurses/6.4-GCCcore-13.2.0
+    zlib/1.2.13-GCCcore-13.2.0 bzip2/1.0.8-GCCcore-13.2.0 OpenSSL/1.1
+    cURL/8.3.0-GCCcore-13.2.0 XZ/5.4.4-GCCcore-13.2.0
+    libarchive/3.7.2-GCCcore-13.2.0
+Loading OpenMPI/4.1.6-GCC-13.2.0
+  Loading requirement: binutils/2.40-GCCcore-13.2.0 GCC/13.2.0
+    numactl/2.0.16-GCCcore-13.2.0 libxml2/2.11.5-GCCcore-13.2.0
+    libpciaccess/0.17-GCCcore-13.2.0 hwloc/2.9.2-GCCcore-13.2.0
+    libevent/2.1.12-GCCcore-13.2.0 UCX/1.15.0-GCCcore-13.2.0
+    libfabric/1.19.0-GCCcore-13.2.0 PMIx/4.2.6-GCCcore-13.2.0
+    UCC/1.2.0-GCCcore-13.2.0
+=== MPI Environment ===
+g++ (GCC) 13.2.0
+mpirun (Open MPI) 4.1.6
+=== Allocated Nodes ===
+     36 cn-033.stdct.loc
+     36 cn-040.stdct.loc
+-- MPI found: /app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/bin/mpicxx
+-- MPI CG targets: cg_mpi_ops, cg_mpi, cg_mpi_benchmark, run_mpi_benchmark
+-- Configuring done (3.4s)
+-- Generating done (3.8s)
+-- Build files have been written to: /scratch/diqingxu/DSA5208/conjugate-gradient/build
+[ 14%] Built target cg_poisson
+[ 35%] Built target cg_mpi_ops
+[ 50%] Built target cg_matrix_market
+[ 64%] Built target cg_mpi
+[ 85%] Built target cg_mpi_benchmark
+[100%] Built target run_mpi_benchmark
+=== MPI Hostfile ===
+cn-040.stdct.loc slots=36
+cn-033.stdct.loc slots=36
+=== 3D Poisson 40^3 ===
+--- Grid: 40^3; ranks: 1 ---
+[CN-033:3035599] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035599] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Warning: Permanently added 'cn-040' (ED25519) to the list of known hosts.
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p1_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0743189 s
+Iterations: 101
+True rel. residual: 8.83638e-09
+--- Grid: 40^3; ranks: 2 ---
+[CN-033:3035615] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035615] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p2_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0442891 s
+Iterations: 101
+True rel. residual: 8.83637e-09
+--- Grid: 40^3; ranks: 4 ---
+[CN-033:3035636] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035636] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p4_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0321022 s
+Iterations: 101
+True rel. residual: 8.83637e-09
+--- Grid: 40^3; ranks: 8 ---
+[CN-033:3035672] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035672] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p8_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0258457 s
+Iterations: 101
+True rel. residual: 8.83638e-09
+--- Grid: 40^3; ranks: 16 ---
+[CN-033:3035741] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035741] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p16_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0244243 s
+Iterations: 101
+True rel. residual: 8.83637e-09
+--- Grid: 40^3; ranks: 32 ---
+[CN-033:3035879] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3035879] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 32 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p32_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 32
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0354128 s
+Iterations: 101
+True rel. residual: 8.83637e-09
+--- Grid: 40^3; ranks: 36 ---
+[CN-033:3036146] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036146] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 36 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p36_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 36
+Runs: 10
+Converged: 10/10
+Median solve time: 0.0372469 s
+Iterations: 101
+True rel. residual: 8.83638e-09
+--- Grid: 40^3; ranks: 72 ---
+[CN-033:3036443] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036443] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 40x40x40 (N=64000)
+Matrix: N=64000 NNZ=438400
+Distributing matrix to 72 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_40
+[warmup 2/4] poisson_3d_40
+[warmup 3/4] poisson_3d_40
+[warmup 4/4] poisson_3d_40
+[run 1/10] poisson_3d_40
+[run 2/10] poisson_3d_40
+[run 3/10] poisson_3d_40
+[run 4/10] poisson_3d_40
+[run 5/10] poisson_3d_40
+[run 6/10] poisson_3d_40
+[run 7/10] poisson_3d_40
+[run 8/10] poisson_3d_40
+[run 9/10] poisson_3d_40
+[run 10/10] poisson_3d_40
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p72_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 72
+Runs: 10
+Converged: 10/10
+Median solve time: 0.176534 s
+Iterations: 101
+True rel. residual: 8.83637e-09
+=== 3D Poisson 64^3 ===
+--- Grid: 64^3; ranks: 1 ---
+[CN-033:3036740] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036740] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p1_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 0.364704 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 2 ---
+[CN-033:3036754] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036754] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p2_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 0.27339 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 4 ---
+[CN-033:3036775] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036775] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p4_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 0.195904 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 8 ---
+[CN-033:3036811] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036811] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p8_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 0.159199 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 16 ---
+[CN-033:3036880] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3036880] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p16_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 0.148874 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 32 ---
+[CN-033:3037013] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037013] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 32 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p32_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 32
+Runs: 10
+Converged: 10/10
+Median solve time: 0.171511 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 36 ---
+[CN-033:3037278] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037278] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 36 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p36_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 36
+Runs: 10
+Converged: 10/10
+Median solve time: 0.186173 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+--- Grid: 64^3; ranks: 72 ---
+[CN-033:3037576] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037576] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 64x64x64 (N=262144)
+Matrix: N=262144 NNZ=1810432
+Distributing matrix to 72 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_64
+[warmup 2/4] poisson_3d_64
+[warmup 3/4] poisson_3d_64
+[warmup 4/4] poisson_3d_64
+[run 1/10] poisson_3d_64
+[run 2/10] poisson_3d_64
+[run 3/10] poisson_3d_64
+[run 4/10] poisson_3d_64
+[run 5/10] poisson_3d_64
+[run 6/10] poisson_3d_64
+[run 7/10] poisson_3d_64
+[run 8/10] poisson_3d_64
+[run 9/10] poisson_3d_64
+[run 10/10] poisson_3d_64
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p72_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 72
+Runs: 10
+Converged: 10/10
+Median solve time: 0.420882 s
+Iterations: 158
+True rel. residual: 9.03206e-09
+=== 3D Poisson 102^3 ===
+--- Grid: 102^3; ranks: 1 ---
+[CN-033:3037877] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037877] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p1_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 3.20638 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 2 ---
+[CN-033:3037962] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037962] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p2_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 1.84921 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 4 ---
+[CN-033:3037986] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3037986] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p4_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 1.30469 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 8 ---
+[CN-033:3038026] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3038026] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p8_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 1.07132 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 16 ---
+[CN-033:3038096] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3038096] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p16_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 1.21992 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 32 ---
+[CN-033:3038341] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3038341] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 32 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p32_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 32
+Runs: 10
+Converged: 10/10
+Median solve time: 1.51971 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 36 ---
+[CN-033:3038609] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3038609] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 36 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p36_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 36
+Runs: 10
+Converged: 10/10
+Median solve time: 1.59098 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+--- Grid: 102^3; ranks: 72 ---
+[CN-033:3038909] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-033:3038909] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 3D Poisson 102x102x102 (N=1061208)
+Matrix: N=1061208 NNZ=7366032
+Distributing matrix to 72 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_3d_102
+[warmup 2/4] poisson_3d_102
+[warmup 3/4] poisson_3d_102
+[warmup 4/4] poisson_3d_102
+[run 1/10] poisson_3d_102
+[run 2/10] poisson_3d_102
+[run 3/10] poisson_3d_102
+[run 4/10] poisson_3d_102
+[run 5/10] poisson_3d_102
+[run 6/10] poisson_3d_102
+[run 7/10] poisson_3d_102
+[run 8/10] poisson_3d_102
+[run 9/10] poisson_3d_102
+[run 10/10] poisson_3d_102
+
+Results written to: /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p72_1502451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 72
+Runs: 10
+Converged: 10/10
+Median solve time: 3.19569 s
+Iterations: 238
+True rel. residual: 9.89319e-09
+=== 3D MPI scaling completed ===
+End: Wed Oct 28 02:21:48 PM +08 2026
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:18 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p1_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:20 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p16_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:19 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p2_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:20 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p32_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:20 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p36_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:19 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p4_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:21 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p72_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:19 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d102_p8_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p1_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p16_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p2_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p32_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p36_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p4_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p72_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d40_p8_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:16 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p1_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p16_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p2_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p32_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p36_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p4_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p72_1502451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 28 14:17 /scratch/diqingxu/DSA5208/conjugate-gradient/results/mpi/3d/mpi_3d64_p8_1502451.stdct-mgmt-02.csv

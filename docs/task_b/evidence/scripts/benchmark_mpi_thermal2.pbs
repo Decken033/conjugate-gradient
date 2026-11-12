@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -N dsa5208_mpi_thermal2
+#PBS -q auto
+#PBS -l select=2:ncpus=36:mpiprocs=36:mem=64gb
+#PBS -l walltime=08:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "$PBS_O_WORKDIR"
+
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=ON
+cmake --build build --parallel 8 --target run_mpi_benchmark
+
+MATRIX="data/thermal2/thermal2.mtx"
+if [[ ! -f "$MATRIX" ]]; then
+    echo "Missing $MATRIX. Run scripts/download_thermal2.ps1 locally and transfer data/suitesparse/thermal2 to the project directory on Vanda." >&2
+    exit 1
+fi
+
+mkdir -p results/mpi/thermal2
+for ranks in 1 2 4 8 16; do
+    output="results/mpi/thermal2/thermal2_p${ranks}_${PBS_JOBID}.csv"
+    echo "=== thermal2 with ${ranks} MPI ranks ==="
+    mpirun -np "$ranks" ./build/run_mpi_benchmark \
+        thermal2 "$MATRIX" 10 "$output" 4
+done

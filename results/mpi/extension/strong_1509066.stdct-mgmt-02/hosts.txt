@@ -1,0 +1,8 @@
+cn-156.stdct.loc slots=36
+gn-a40-078.stdct.loc slots=36
+cn-053.stdct.loc slots=36
+gn-a40-066.stdct.loc slots=36
+cn-031.stdct.loc slots=36
+cn-032.stdct.loc slots=36
+cn-033.stdct.loc slots=36
+cn-058.stdct.loc slots=36

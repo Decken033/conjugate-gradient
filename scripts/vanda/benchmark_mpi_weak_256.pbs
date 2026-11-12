@@ -1,0 +1,62 @@
+#!/bin/bash
+# Weak scaling: 2D Poisson with exactly 128^2 unknowns per MPI rank.
+# Submit from the repository root: qsub scripts/vanda/benchmark_mpi_weak_256.pbs
+# Grid sizes are 128, 256, 512, 1024, 2048 for 1, 4, 16, 64, 256 ranks.
+
+#PBS -N dsa5208_mpi_weak_256
+#PBS -P personal-diqingxu
+#PBS -q auto
+#PBS -l select=8:ncpus=36:mpiprocs=36:mem=64gb
+#PBS -l place=scatter
+#PBS -l walltime=06:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+cd "$PBS_O_WORKDIR"
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+export OMP_NUM_THREADS=1
+
+echo "Job ID: $PBS_JOBID"
+echo "Start: $(date)"
+echo "Submission directory: $PBS_O_WORKDIR"
+g++ --version | head -n 1
+mpirun --version | head -n 1
+lscpu | grep -E '^Model name:|^CPU\(s\):|^Thread\(s\) per core:|^Core\(s\) per socket:'
+echo "Allocated slots by host:"
+sort "$PBS_NODEFILE" | uniq -c
+
+allocated_slots=$(wc -l < "$PBS_NODEFILE")
+if (( allocated_slots < 256 )); then
+    echo "Expected at least 256 allocated MPI slots, found $allocated_slots" >&2
+    exit 1
+fi
+
+build_dir="build-mpi-scaling-${PBS_JOBID}"
+cmake -S . -B "$build_dir" -DCMAKE_BUILD_TYPE=Release -DCG_ENABLE_MPI=ON
+cmake --build "$build_dir" --parallel 8 --target run_mpi_benchmark
+
+results_dir="results/mpi/extension/weak_${PBS_JOBID}"
+mkdir -p "$results_dir"
+hostfile="${results_dir}/hosts.txt"
+awk '!seen[$1]++ {order[++n]=$1} {slots[$1]++}
+     END {for (i=1; i<=n; i++) print order[i] " slots=" slots[order[i]]}' \
+    "$PBS_NODEFILE" > "$hostfile"
+echo "MPI hostfile:"
+cat "$hostfile"
+
+for case in 1:128 4:256 16:512 64:1024 256:2048; do
+    ranks=${case%%:*}
+    grid=${case#*:}
+    output="${results_dir}/weak_2d${grid}_p${ranks}_${PBS_JOBID}.csv"
+    echo "=== Weak scaling: ${grid} x ${grid}, ranks=$ranks, $(date) ==="
+    mpirun -np "$ranks" \
+        --hostfile "$hostfile" \
+        -x PATH -x LD_LIBRARY_PATH \
+        --map-by slot --bind-to core --nooversubscribe --display-map \
+        "./${build_dir}/run_mpi_benchmark" 2d "$grid" 10 "$output" 4
+done
+
+echo "Weak scaling completed: $(date)"

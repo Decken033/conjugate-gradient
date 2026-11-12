@@ -5,9 +5,22 @@
 #include <stdexcept>
 #include <vector>
 #include <cstddef>
+#include <exception>
+#include <limits>
 
 namespace cg {
 namespace {
+
+// No rank may leave validation while peers proceed into a collective.
+void agree_validation(std::exception_ptr error, MPI_Comm comm) {
+    int failed = error ? 1 : 0;
+    int any_failed = 0;
+    MPI_Allreduce(&failed, &any_failed, 1, MPI_INT, MPI_MAX, comm);
+    if (any_failed) {
+        if (error) std::rethrow_exception(error);
+        throw std::invalid_argument("MPI partition validation failed on another rank");
+    }
+}
 
 // Compute partition boundaries for P ranks and N rows.
 // Returns vector of size P+1 where entry r is the first row for rank r.
@@ -89,31 +102,39 @@ MPIPartitionedMatrix partition_matrix(
     // Rank 0: validate and broadcast global dimensions
     std::size_t dims[2] = {0, 0};
 
+    std::exception_ptr root_error;
     if (rank == 0) {
-        global_matrix.validate();
+        try {
+            global_matrix.validate();
 
-        if (global_matrix.rows == 0) {
-            throw std::invalid_argument(
-                "Cannot partition empty matrix"
-            );
+            if (global_matrix.rows == 0) {
+                throw std::invalid_argument("Cannot partition empty matrix");
+            }
+
+            // CG requires square matrices (SPD must be square).
+            if (global_matrix.rows != global_matrix.cols) {
+                throw std::invalid_argument(
+                    "MPI partition requires square matrix (CG/SPD requirement)");
+            }
+
+            if (static_cast<std::size_t>(num_ranks) > global_matrix.rows) {
+                throw std::invalid_argument(
+                    "More MPI ranks than matrix rows: partitioning would "
+                    "create empty rank assignments");
+            }
+
+            dims[0] = global_matrix.rows;
+            dims[1] = global_matrix.cols;
+        } catch (...) {
+            root_error = std::current_exception();
         }
+    }
 
-        // CG requires square matrices (SPD must be square)
-        if (global_matrix.rows != global_matrix.cols) {
-            throw std::invalid_argument(
-                "MPI partition requires square matrix (CG/SPD requirement)"
-            );
-        }
-
-        if (static_cast<std::size_t>(num_ranks) > global_matrix.rows) {
-            throw std::invalid_argument(
-                "More MPI ranks than matrix rows: partitioning would "
-                "create empty rank assignments"
-            );
-        }
-
-        dims[0] = global_matrix.rows;
-        dims[1] = global_matrix.cols;
+    int root_failed = root_error ? 1 : 0;
+    MPI_Bcast(&root_failed, 1, MPI_INT, 0, comm);
+    if (root_failed) {
+        if (root_error) std::rethrow_exception(root_error);
+        throw std::invalid_argument("Matrix validation failed on rank 0");
     }
 
     // Broadcast dimensions to all ranks
@@ -198,8 +219,14 @@ MPIPartitionedMatrix partition_matrix(
         }
     }
 
-    // Validate local CSR structure
-    result.local_matrix.validate_structure();
+    // Validate local CSR structure collectively before returning to callers.
+    std::exception_ptr local_error;
+    try {
+        result.local_matrix.validate_structure();
+    } catch (...) {
+        local_error = std::current_exception();
+    }
+    agree_validation(local_error, comm);
 
     return result;
 }
@@ -212,24 +239,33 @@ void validate_partition(
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &num_ranks);
 
-    // Validate local CSR
-    part.local_matrix.validate_structure();
-
-    // Check partition offsets size
-    if (part.partition_offsets.size() !=
-        static_cast<std::size_t>(num_ranks + 1)) {
-        throw std::invalid_argument(
-            "Partition offsets size mismatch"
-        );
+    std::exception_ptr local_error;
+    try {
+        part.local_matrix.validate_structure();
+        if (part.partition_offsets.size() !=
+            static_cast<std::size_t>(num_ranks + 1)) {
+            throw std::invalid_argument("Partition offsets size mismatch");
+        }
+        if (part.row_start > part.row_end ||
+            part.row_start != part.partition_offsets[rank] ||
+            part.row_end != part.partition_offsets[rank + 1] ||
+            part.local_matrix.rows != part.local_rows()) {
+            throw std::invalid_argument(
+                "Local row range doesn't match partition offsets");
+        }
+        if (part.partition_offsets.front() != 0 ||
+            part.partition_offsets.back() != part.global_rows) {
+            throw std::invalid_argument("Partition offsets don't cover global rows");
+        }
+        for (std::size_t i = 0; i < part.partition_offsets.size() - 1; ++i) {
+            if (part.partition_offsets[i] > part.partition_offsets[i + 1]) {
+                throw std::invalid_argument("Partition offsets are not nondecreasing");
+            }
+        }
+    } catch (...) {
+        local_error = std::current_exception();
     }
-
-    // Verify local row range matches partition
-    if (part.row_start != part.partition_offsets[rank] ||
-        part.row_end != part.partition_offsets[rank + 1]) {
-        throw std::invalid_argument(
-            "Local row range doesn't match partition offsets"
-        );
-    }
+    agree_validation(local_error, comm);
 
     // Sum local row counts and verify global total
     std::size_t local_rows = part.local_rows();
@@ -238,11 +274,8 @@ void validate_partition(
     MPI_Allreduce(&local_rows, &total_rows, 1, MPI_UNSIGNED_LONG,
                   MPI_SUM, comm);
 
-    if (total_rows != part.global_rows) {
-        throw std::runtime_error(
-            "Sum of local rows doesn't match global row count"
-        );
-    }
+    // Do not throw on a rank-specific global_rows value before the
+    // remaining agreement collectives have completed.
 
     // Verify global dimensions are consistent across ranks
     std::size_t global_dims[2] = {part.global_rows, part.global_cols};
@@ -254,11 +287,36 @@ void validate_partition(
     MPI_Allreduce(global_dims, min_dims, 2, MPI_UNSIGNED_LONG,
                   MPI_MIN, comm);
 
+    std::exception_ptr consistency_error;
     if (max_dims[0] != min_dims[0] || max_dims[1] != min_dims[1]) {
-        throw std::runtime_error(
-            "Global dimensions inconsistent across ranks"
-        );
+        consistency_error = std::make_exception_ptr(std::runtime_error(
+            "Global dimensions inconsistent across ranks"));
+    } else if (total_rows != part.global_rows) {
+        consistency_error = std::make_exception_ptr(std::runtime_error(
+            "Sum of local rows doesn't match global row count"));
     }
+
+    // Compare the complete layout in bounded chunks without allocating
+    // validation buffers or issuing one collective per rank boundary.
+    bool offsets_match = true;
+    for (std::size_t first = 0; first < part.partition_offsets.size(); first += 64) {
+        std::size_t reference[64];
+        const int count = static_cast<int>(std::min<std::size_t>(
+            64, part.partition_offsets.size() - first));
+        if (rank == 0) {
+            std::copy_n(part.partition_offsets.data() + first, count, reference);
+        }
+        MPI_Bcast(reference, count, MPI_UNSIGNED_LONG, 0, comm);
+        for (int i = 0; i < count; ++i) {
+            offsets_match = offsets_match &&
+                reference[i] == part.partition_offsets[first + i];
+        }
+    }
+    if (!offsets_match && !consistency_error) {
+        consistency_error = std::make_exception_ptr(std::runtime_error(
+            "Partition offsets inconsistent across ranks"));
+    }
+    agree_validation(consistency_error, comm);
 }
 
 std::vector<double> gather_vector(
@@ -270,11 +328,19 @@ std::vector<double> gather_vector(
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &num_ranks);
 
-    if (local_vec.size() != part.local_rows()) {
-        throw std::invalid_argument(
-            "Local vector size doesn't match partition"
-        );
+    validate_partition(part, comm);
+    std::exception_ptr local_error;
+    try {
+        if (local_vec.size() != part.local_rows()) {
+            throw std::invalid_argument("Local vector size doesn't match partition");
+        }
+        if (part.global_rows > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+            throw std::overflow_error("MPI gather: vector exceeds int count limit");
+        }
+    } catch (...) {
+        local_error = std::current_exception();
     }
+    agree_validation(local_error, comm);
 
     // Compute receive counts and displacements for rank 0
     std::vector<int> recvcounts;
@@ -315,11 +381,19 @@ std::vector<double> scatter_vector(
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &num_ranks);
 
-    if (rank == 0 && global_vec.size() != part.global_rows) {
-        throw std::invalid_argument(
-            "Global vector size doesn't match partition"
-        );
+    validate_partition(part, comm);
+    std::exception_ptr local_error;
+    try {
+        if (rank == 0 && global_vec.size() != part.global_rows) {
+            throw std::invalid_argument("Global vector size doesn't match partition");
+        }
+        if (part.global_rows > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+            throw std::overflow_error("MPI scatter: vector exceeds int count limit");
+        }
+    } catch (...) {
+        local_error = std::current_exception();
     }
+    agree_validation(local_error, comm);
 
     // Compute send counts and displacements on rank 0
     std::vector<int> sendcounts;

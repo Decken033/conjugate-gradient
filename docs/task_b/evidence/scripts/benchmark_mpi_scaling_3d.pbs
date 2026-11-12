@@ -1,0 +1,80 @@
+#!/bin/bash
+# DSA5208 MPI CG - 3D Strong Scaling
+# Grid sizes: 40^3, 64^3, 102^3
+# Ranks: 1, 2, 4, 8, 16, 32, 36, 72
+# Per configuration: 4 warmups + 10 measured runs
+
+#PBS -N dsa5208_mpi_scaling_3d
+#PBS -P personal-diqingxu
+#PBS -q auto
+#PBS -l select=2:ncpus=36:mpiprocs=36:mem=64gb
+#PBS -l place=scatter
+#PBS -l walltime=03:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+PROJECT_DIR="/scratch/diqingxu/DSA5208/conjugate-gradient"
+RESULTS_DIR="${PROJECT_DIR}/results/mpi/3d"
+
+echo "=== DSA5208 MPI CG 3D Strong Scaling ==="
+echo "Job ID: ${PBS_JOBID}"
+echo "Host: $(hostname)"
+echo "Start: $(date)"
+
+module purge
+module load CMake/3.27.6-GCCcore-13.2.0
+module load OpenMPI/4.1.6-GCC-13.2.0
+
+export OMP_NUM_THREADS=1
+
+cd "$PROJECT_DIR"
+
+echo "=== MPI Environment ==="
+g++ --version | head -n 1
+mpirun --version | head -n 1
+echo "=== Allocated Nodes ==="
+sort "$PBS_NODEFILE" | uniq -c
+
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCG_ENABLE_MPI=ON
+cmake --build build --parallel 8 --target run_mpi_benchmark
+
+mkdir -p "$RESULTS_DIR"
+
+MPI_HOSTFILE="${RESULTS_DIR}/mpi_hostfile_${PBS_JOBID}"
+awk '{slots[$1]++}
+     END {for (host in slots) print host " slots=" slots[host]}' \
+    "$PBS_NODEFILE" > "$MPI_HOSTFILE"
+test -s "$MPI_HOSTFILE"
+trap 'rm -f "$MPI_HOSTFILE"' EXIT
+
+echo "=== MPI Hostfile ==="
+cat "$MPI_HOSTFILE"
+
+REPEATS=10
+WARMUPS=4
+
+for GRID_SIZE in 40 64 102; do
+    echo "=== 3D Poisson ${GRID_SIZE}^3 ==="
+
+    for RANKS in 1 2 4 8 16 32 36 72; do
+        OUTPUT_FILE="${RESULTS_DIR}/mpi_3d${GRID_SIZE}_p${RANKS}_${PBS_JOBID}.csv"
+
+        echo "--- Grid: ${GRID_SIZE}^3; ranks: ${RANKS} ---"
+        mpirun -np "$RANKS" \
+            --hostfile "$MPI_HOSTFILE" \
+            -x PATH \
+            -x LD_LIBRARY_PATH \
+            -x OMP_NUM_THREADS \
+            --map-by slot \
+            --bind-to core \
+            ./build/run_mpi_benchmark \
+            3d "$GRID_SIZE" "$REPEATS" "$OUTPUT_FILE" "$WARMUPS"
+    done
+done
+
+echo "=== 3D MPI scaling completed ==="
+echo "End: $(date)"
+ls -lh "${RESULTS_DIR}"/mpi_3d*_p*_"${PBS_JOBID}".csv

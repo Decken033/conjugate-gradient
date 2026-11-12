@@ -96,6 +96,7 @@ int main(int argc, char* argv[]) {
         std::string matrix_name;
 
         if (rank == 0) {
+          try {
             if (matrix_type == "2d") {
                 const std::size_t n = std::stoul(matrix_arg);
                 std::cout << "Generating 2D Poisson " << n << "x" << n
@@ -124,6 +125,17 @@ int main(int argc, char* argv[]) {
                 std::cout << "Matrix: N=" << global_matrix.rows
                           << " NNZ=" << global_matrix.nnz() << "\n";
             }
+          } catch (const std::exception& ex) {
+            std::cerr << "[rank 0] Matrix preparation failed: " << ex.what() << "\n";
+            exit_code = 1;
+          }
+        }
+
+        // Root preparation may fail before peers can receive the matrix name.
+        MPI_Bcast(&exit_code, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        if (exit_code != 0) {
+            MPI_Finalize();
+            return exit_code;
         }
 
         // Broadcast matrix name to all ranks
@@ -187,6 +199,7 @@ int main(int argc, char* argv[]) {
 
         // Write CSV (rank 0 only)
         if (rank == 0) {
+          try {
             cg::write_mpi_benchmark_csv(records, output_csv, rank);
 
             std::cout << "\nResults written to: " << output_csv << "\n";
@@ -222,11 +235,22 @@ int main(int argc, char* argv[]) {
                 std::cout << "True rel. residual: "
                           << records[0].true_relative_residual << "\n";
             }
+          } catch (const std::exception& ex) {
+            std::cerr << "[rank 0] CSV output failed: " << ex.what() << "\n";
+            exit_code = 1;
+          }
         }
+        MPI_Bcast(&exit_code, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     } catch (const std::exception& ex) {
         std::cerr << "[rank " << rank << "] Error: " << ex.what() << "\n";
-        exit_code = 1;
+        // Unexpected exceptions may occur on only one rank. Finalize alone
+        // cannot release peers blocked in a collective; fail the communicator.
+        MPI_Abort(MPI_COMM_WORLD, 1);
+        return 1;
+    } catch (...) {
+        MPI_Abort(MPI_COMM_WORLD, 1);
+        return 1;
     }
 
     MPI_Finalize();

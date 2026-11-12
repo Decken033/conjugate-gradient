@@ -1,0 +1,314 @@
+=== DSA5208 MPI CG Scaling Benchmark 1024x1024 ===
+PBS job ID: 1482491.stdct-mgmt-02
+Host: CN-093
+Nodes: cn-093.stdct.loc,cn-094.stdct.loc
+Timestamp: Sat Oct 24 01:40:11 PM +08 2026
+Unloading shared
+  WARNING: Did not unuse /cm/shared/modulefiles
+Loading CMake/3.27.6-GCCcore-13.2.0
+  Loading requirement: GCCcore/13.2.0 ncurses/6.4-GCCcore-13.2.0
+    zlib/1.2.13-GCCcore-13.2.0 bzip2/1.0.8-GCCcore-13.2.0 OpenSSL/1.1
+    cURL/8.3.0-GCCcore-13.2.0 XZ/5.4.4-GCCcore-13.2.0
+    libarchive/3.7.2-GCCcore-13.2.0
+Loading OpenMPI/4.1.6-GCC-13.2.0
+  Loading requirement: binutils/2.40-GCCcore-13.2.0 GCC/13.2.0
+    numactl/2.0.16-GCCcore-13.2.0 libxml2/2.11.5-GCCcore-13.2.0
+    libpciaccess/0.17-GCCcore-13.2.0 hwloc/2.9.2-GCCcore-13.2.0
+    libevent/2.1.12-GCCcore-13.2.0 UCX/1.15.0-GCCcore-13.2.0
+    libfabric/1.19.0-GCCcore-13.2.0 PMIx/4.2.6-GCCcore-13.2.0
+    UCC/1.2.0-GCCcore-13.2.0
+g++ (GCC) 13.2.0
+mpirun (Open MPI) 4.1.6
+-- MPI found: /app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/bin/mpicxx
+-- MPI CG targets: cg_mpi_ops, cg_mpi, cg_mpi_benchmark, run_mpi_benchmark
+-- Configuring done (3.3s)
+-- Generating done (3.5s)
+-- Build files have been written to: /scratch/diqingxu/DSA5208/conjugate-gradient/build
+[ 14%] Built target cg_poisson
+[ 28%] Building CXX object CMakeFiles/cg_mpi_ops.dir/src/mpi/mpi_partition.cpp.o
+[ 28%] Building CXX object CMakeFiles/cg_mpi_ops.dir/src/mpi/mpi_ops.cpp.o
+[ 42%] Built target cg_matrix_market
+[ 50%] Linking CXX static library libcg_mpi_ops.a
+[ 50%] Built target cg_mpi_ops
+[ 57%] Building CXX object CMakeFiles/cg_mpi.dir/src/mpi/mpi_solver.cpp.o
+[ 64%] Linking CXX static library libcg_mpi.a
+[ 64%] Built target cg_mpi
+[ 71%] Building CXX object CMakeFiles/cg_mpi_benchmark.dir/src/mpi/benchmark_mpi.cpp.o
+[ 78%] Building CXX object CMakeFiles/cg_mpi_benchmark.dir/src/mpi/benchmark_mpi_csv.cpp.o
+[ 85%] Linking CXX static library libcg_mpi_benchmark.a
+[ 85%] Built target cg_mpi_benchmark
+[ 92%] Building CXX object CMakeFiles/run_mpi_benchmark.dir/src/mpi/run_mpi_benchmark.cpp.o
+[100%] Linking CXX executable run_mpi_benchmark
+[100%] Built target run_mpi_benchmark
+CPU(s):                               72
+Model name:                           Intel(R) Xeon(R) Platinum 8452Y
+Thread(s) per core:                   1
+Core(s) per socket:                   36
+
+=== 2D Poisson 1024x1024 (N=1048576) ===
+--- Ranks: 1 ---
+[CN-093:1244650] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1244650] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Warning: Permanently added 'cn-094' (ED25519) to the list of known hosts.
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p1_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 29.199 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 2 ---
+[CN-093:1246225] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1246225] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p2_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 15.1269 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 4 ---
+[CN-093:1246477] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1246477] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p4_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 9.92941 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 8 ---
+[CN-093:1246594] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1246594] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p8_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 8.66245 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 16 ---
+[CN-093:1246736] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1246736] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p16_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 8.53844 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 32 ---
+[CN-093:1246945] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1246945] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 32 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p32_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 32
+Runs: 10
+Converged: 10/10
+Median solve time: 10.782 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 36 ---
+[CN-093:1247399] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1247399] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 36 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p36_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 36
+Runs: 10
+Converged: 10/10
+Median solve time: 11.1887 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+--- Ranks: 72 ---
+[CN-093:1247968] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-093:1247968] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 1024x1024 (N=1048576)
+Matrix: N=1048576 NNZ=5238784
+Distributing matrix to 72 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_1024
+[warmup 2/4] poisson_2d_1024
+[warmup 3/4] poisson_2d_1024
+[warmup 4/4] poisson_2d_1024
+[run 1/10] poisson_2d_1024
+[run 2/10] poisson_2d_1024
+[run 3/10] poisson_2d_1024
+[run 4/10] poisson_2d_1024
+[run 5/10] poisson_2d_1024
+[run 6/10] poisson_2d_1024
+[run 7/10] poisson_2d_1024
+[run 8/10] poisson_2d_1024
+[run 9/10] poisson_2d_1024
+[run 10/10] poisson_2d_1024
+
+Results written to: results/mpi/mpi_2d1024_p72_1482491.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 72
+Runs: 10
+Converged: 10/10
+Median solve time: 40.097 s
+Iterations: 1755
+True rel. residual: 9.80212e-09
+
+=== 1024x1024 scaling completed ===

@@ -1,0 +1,306 @@
+=== MPI Strong Scaling Benchmark ===
+Job ID: 1482451.stdct-mgmt-02
+Host: GN-A40-048
+Start: Sat Oct 24 12:58:47 PM +08 2026
+Unloading shared
+  WARNING: Did not unuse /cm/shared/modulefiles
+Loading CMake/3.27.6-GCCcore-13.2.0
+  Loading requirement: GCCcore/13.2.0 ncurses/6.4-GCCcore-13.2.0
+    zlib/1.2.13-GCCcore-13.2.0 bzip2/1.0.8-GCCcore-13.2.0 OpenSSL/1.1
+    cURL/8.3.0-GCCcore-13.2.0 XZ/5.4.4-GCCcore-13.2.0
+    libarchive/3.7.2-GCCcore-13.2.0
+Loading OpenMPI/4.1.6-GCC-13.2.0
+  Loading requirement: binutils/2.40-GCCcore-13.2.0 GCC/13.2.0
+    numactl/2.0.16-GCCcore-13.2.0 libxml2/2.11.5-GCCcore-13.2.0
+    libpciaccess/0.17-GCCcore-13.2.0 hwloc/2.9.2-GCCcore-13.2.0
+    libevent/2.1.12-GCCcore-13.2.0 UCX/1.15.0-GCCcore-13.2.0
+    libfabric/1.19.0-GCCcore-13.2.0 PMIx/4.2.6-GCCcore-13.2.0
+    UCC/1.2.0-GCCcore-13.2.0
+=== MPI Environment ===
+/app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/bin/mpirun
+mpirun (Open MPI) 4.1.6
+PATH=/app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/UCC/1.2.0-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/PMIx/4.2.6-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/libfabric/1.19.0-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/UCX/1.15.0-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/libevent/2.1.12-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx512/software/hwloc/2.9.2-GCCcore-13.2.0/sbin:/app1/ebapps/arches/flat-avx512/software/hwloc/2.9.2-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/libxml2/2.11.5-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/numactl/2.0.16-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/binutils/2.40-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/CMake/3.27.6-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/libarchive/3.7.2-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/XZ/5.4.4-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/cURL/8.3.0-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/OpenSSL/1.1/bin:/app1/ebapps/arches/flat-avx2/software/bzip2/1.0.8-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/ncurses/6.4-GCCcore-13.2.0/bin:/app1/ebapps/arches/flat-avx2/software/GCCcore/13.2.0/bin:/home/svu/diqingxu/.local/bin:/home/svu/diqingxu/bin:/cm/local/apps/environment-modules/4.5.3//bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/sbin:/cm/local/apps/environment-modules/4.5.3/bin:/opt/pbs/bin
+LD_LIBRARY_PATH=/app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/UCC/1.2.0-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/PMIx/4.2.6-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/libfabric/1.19.0-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/UCX/1.15.0-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/libevent/2.1.12-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx512/software/hwloc/2.9.2-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/libpciaccess/0.17-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/libxml2/2.11.5-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/numactl/2.0.16-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/binutils/2.40-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/libarchive/3.7.2-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/XZ/5.4.4-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/cURL/8.3.0-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/OpenSSL/1.1/lib:/app1/ebapps/arches/flat-avx2/software/bzip2/1.0.8-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/zlib/1.2.13-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/ncurses/6.4-GCCcore-13.2.0/lib:/app1/ebapps/arches/flat-avx2/software/GCCcore/13.2.0/lib64
+=== Linked MPI Libraries ===
+	libmpi.so.40 => /app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/lib/libmpi.so.40 (0x0000153ffeb50000)
+=== Allocated Nodes ===
+     36 gn-a40-048.stdct.loc
+     36 gn-a40-050.stdct.loc
+=== MPI Hostfile ===
+gn-a40-050.stdct.loc slots=36
+gn-a40-048.stdct.loc slots=36
+=== Running 1 MPI ranks ===
+[GN-A40-048:997821] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:997821] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Warning: Permanently added 'gn-a40-050' (ED25519) to the list of known hosts.
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p1_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 1.80204 s
+Iterations: 894
+True rel. residual: 9.52607e-09
+Completed 1 ranks
+=== Running 2 MPI ranks ===
+[GN-A40-048:997969] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:997969] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p2_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 1.48601 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 2 ranks
+=== Running 4 MPI ranks ===
+[GN-A40-048:997993] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:997993] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p4_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 0.774386 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 4 ranks
+=== Running 8 MPI ranks ===
+[GN-A40-048:998030] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:998030] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p8_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 0.646075 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 8 ranks
+=== Running 16 MPI ranks ===
+[GN-A40-048:998118] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:998118] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p16_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 0.633288 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 16 ranks
+=== Running 32 MPI ranks ===
+[GN-A40-048:998252] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:998252] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 32 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p32_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 32
+Runs: 10
+Converged: 10/10
+Median solve time: 0.877448 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 32 ranks
+=== Running 36 MPI ranks ===
+[GN-A40-048:998681] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:998681] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 36 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p36_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 36
+Runs: 10
+Converged: 10/10
+Median solve time: 0.976516 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 36 ranks
+=== Running 72 MPI ranks ===
+[GN-A40-048:998982] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[GN-A40-048:998982] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Authorized users only. All activity may be monitored and reported.
+Generating 2D Poisson 512x512 (N=262144)
+Matrix: N=262144 NNZ=1308672
+Distributing matrix to 72 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] poisson_2d_512
+[warmup 2/4] poisson_2d_512
+[warmup 3/4] poisson_2d_512
+[warmup 4/4] poisson_2d_512
+[run 1/10] poisson_2d_512
+[run 2/10] poisson_2d_512
+[run 3/10] poisson_2d_512
+[run 4/10] poisson_2d_512
+[run 5/10] poisson_2d_512
+[run 6/10] poisson_2d_512
+[run 7/10] poisson_2d_512
+[run 8/10] poisson_2d_512
+[run 9/10] poisson_2d_512
+[run 10/10] poisson_2d_512
+
+Results written to: results/mpi/mpi_2d512_p72_1482451.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 72
+Runs: 10
+Converged: 10/10
+Median solve time: 3.11289 s
+Iterations: 894
+True rel. residual: 9.52608e-09
+Completed 72 ranks
+=== 512x512 Scaling Completed ===
+End: Sat Oct 24 01:02:39 PM +08 2026
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:00 results/mpi/mpi_2d512_p1_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:01 results/mpi/mpi_2d512_p16_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:00 results/mpi/mpi_2d512_p2_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:01 results/mpi/mpi_2d512_p32_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:01 results/mpi/mpi_2d512_p36_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:00 results/mpi/mpi_2d512_p4_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.2K Oct 24 13:02 results/mpi/mpi_2d512_p72_1482451.stdct-mgmt-02.csv
+-rw-r----- 1 diqingxu svuusers 1.3K Oct 24 13:01 results/mpi/mpi_2d512_p8_1482451.stdct-mgmt-02.csv

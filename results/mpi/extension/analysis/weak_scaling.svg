@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="900" viewBox="0 0 980 900" role="img">
+<title>MPI 2D Poisson weak scaling</title>
+<rect width="100%" height="100%" fill="white"/>
+<text x="490" y="35" text-anchor="middle" font-family="Arial" font-size="22" fill="#26343e">MPI 2D Poisson weak scaling</text>
+<text x="252.5" y="68" text-anchor="middle" font-family="Arial" font-size="16" fill="#26343e">Mean solver time (s)</text>
+<line x1="65" y1="375.0" x2="440" y2="375.0" stroke="#e0e5e8"/>
+<text x="58" y="379.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0</text>
+<line x1="65" y1="305.0" x2="440" y2="305.0" stroke="#e0e5e8"/>
+<text x="58" y="309.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">81.5</text>
+<line x1="65" y1="235.0" x2="440" y2="235.0" stroke="#e0e5e8"/>
+<text x="58" y="239.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">163</text>
+<line x1="65" y1="165.0" x2="440" y2="165.0" stroke="#e0e5e8"/>
+<text x="58" y="169.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">245</text>
+<line x1="65" y1="95.0" x2="440" y2="95.0" stroke="#e0e5e8"/>
+<text x="58" y="99.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">326</text>
+<line x1="65.0" y1="95" x2="65.0" y2="375" stroke="#edf0f2"/>
+<text x="65.0" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">1</text>
+<line x1="111.9" y1="95" x2="111.9" y2="375" stroke="#edf0f2"/>
+<text x="111.9" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">2</text>
+<line x1="158.8" y1="95" x2="158.8" y2="375" stroke="#edf0f2"/>
+<text x="158.8" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">4</text>
+<line x1="205.6" y1="95" x2="205.6" y2="375" stroke="#edf0f2"/>
+<text x="205.6" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">8</text>
+<line x1="252.5" y1="95" x2="252.5" y2="375" stroke="#edf0f2"/>
+<text x="252.5" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">16</text>
+<line x1="299.4" y1="95" x2="299.4" y2="375" stroke="#edf0f2"/>
+<text x="299.4" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">32</text>
+<line x1="346.2" y1="95" x2="346.2" y2="375" stroke="#edf0f2"/>
+<text x="346.2" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">64</text>
+<line x1="393.1" y1="95" x2="393.1" y2="375" stroke="#edf0f2"/>
+<text x="393.1" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">128</text>
+<line x1="440.0" y1="95" x2="440.0" y2="375" stroke="#edf0f2"/>
+<text x="440.0" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">256</text>
+<polyline points="65.0,375.0 158.8,374.9 252.5,374.5 346.2,358.0 440.0,125.0" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="65.0" cy="375.0" r="4" fill="#c45624"/>
+<circle cx="158.8" cy="374.9" r="4" fill="#c45624"/>
+<circle cx="252.5" cy="374.5" r="4" fill="#c45624"/>
+<circle cx="346.2" cy="358.0" r="4" fill="#c45624"/>
+<circle cx="440.0" cy="125.0" r="4" fill="#c45624"/>
+<text x="252.5" y="423" text-anchor="middle" font-family="Arial" font-size="12" fill="#52616b">MPI ranks (log2 scale)</text>
+<text x="707.5" y="68" text-anchor="middle" font-family="Arial" font-size="16" fill="#26343e">Time per iteration (s)</text>
+<line x1="520" y1="375.0" x2="895" y2="375.0" stroke="#e0e5e8"/>
+<text x="513" y="379.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0</text>
+<line x1="520" y1="305.0" x2="895" y2="305.0" stroke="#e0e5e8"/>
+<text x="513" y="309.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.0237</text>
+<line x1="520" y1="235.0" x2="895" y2="235.0" stroke="#e0e5e8"/>
+<text x="513" y="239.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.0474</text>
+<line x1="520" y1="165.0" x2="895" y2="165.0" stroke="#e0e5e8"/>
+<text x="513" y="169.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.0711</text>
+<line x1="520" y1="95.0" x2="895" y2="95.0" stroke="#e0e5e8"/>
+<text x="513" y="99.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.0948</text>
+<line x1="520.0" y1="95" x2="520.0" y2="375" stroke="#edf0f2"/>
+<text x="520.0" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">1</text>
+<line x1="566.9" y1="95" x2="566.9" y2="375" stroke="#edf0f2"/>
+<text x="566.9" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">2</text>
+<line x1="613.8" y1="95" x2="613.8" y2="375" stroke="#edf0f2"/>
+<text x="613.8" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">4</text>
+<line x1="660.6" y1="95" x2="660.6" y2="375" stroke="#edf0f2"/>
+<text x="660.6" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">8</text>
+<line x1="707.5" y1="95" x2="707.5" y2="375" stroke="#edf0f2"/>
+<text x="707.5" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">16</text>
+<line x1="754.4" y1="95" x2="754.4" y2="375" stroke="#edf0f2"/>
+<text x="754.4" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">32</text>
+<line x1="801.2" y1="95" x2="801.2" y2="375" stroke="#edf0f2"/>
+<text x="801.2" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">64</text>
+<line x1="848.1" y1="95" x2="848.1" y2="375" stroke="#edf0f2"/>
+<text x="848.1" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">128</text>
+<line x1="895.0" y1="95" x2="895.0" y2="375" stroke="#edf0f2"/>
+<text x="895.0" y="395" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">256</text>
+<polyline points="520.0,374.5 613.8,373.9 707.5,372.9 801.2,341.6 895.0,125.0" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="520.0" cy="374.5" r="4" fill="#c45624"/>
+<circle cx="613.8" cy="373.9" r="4" fill="#c45624"/>
+<circle cx="707.5" cy="372.9" r="4" fill="#c45624"/>
+<circle cx="801.2" cy="341.6" r="4" fill="#c45624"/>
+<circle cx="895.0" cy="125.0" r="4" fill="#c45624"/>
+<text x="707.5" y="423" text-anchor="middle" font-family="Arial" font-size="12" fill="#52616b">MPI ranks (log2 scale)</text>
+<text x="252.5" y="458" text-anchor="middle" font-family="Arial" font-size="16" fill="#26343e">Weak efficiency (fraction)</text>
+<line x1="65" y1="765.0" x2="440" y2="765.0" stroke="#e0e5e8"/>
+<text x="58" y="769.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0</text>
+<line x1="65" y1="695.0" x2="440" y2="695.0" stroke="#e0e5e8"/>
+<text x="58" y="699.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.28</text>
+<line x1="65" y1="625.0" x2="440" y2="625.0" stroke="#e0e5e8"/>
+<text x="58" y="629.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.56</text>
+<line x1="65" y1="555.0" x2="440" y2="555.0" stroke="#e0e5e8"/>
+<text x="58" y="559.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0.84</text>
+<line x1="65" y1="485.0" x2="440" y2="485.0" stroke="#e0e5e8"/>
+<text x="58" y="489.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">1.12</text>
+<line x1="65.0" y1="485" x2="65.0" y2="765" stroke="#edf0f2"/>
+<text x="65.0" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">1</text>
+<line x1="111.9" y1="485" x2="111.9" y2="765" stroke="#edf0f2"/>
+<text x="111.9" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">2</text>
+<line x1="158.8" y1="485" x2="158.8" y2="765" stroke="#edf0f2"/>
+<text x="158.8" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">4</text>
+<line x1="205.6" y1="485" x2="205.6" y2="765" stroke="#edf0f2"/>
+<text x="205.6" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">8</text>
+<line x1="252.5" y1="485" x2="252.5" y2="765" stroke="#edf0f2"/>
+<text x="252.5" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">16</text>
+<line x1="299.4" y1="485" x2="299.4" y2="765" stroke="#edf0f2"/>
+<text x="299.4" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">32</text>
+<line x1="346.2" y1="485" x2="346.2" y2="765" stroke="#edf0f2"/>
+<text x="346.2" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">64</text>
+<line x1="393.1" y1="485" x2="393.1" y2="765" stroke="#edf0f2"/>
+<text x="393.1" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">128</text>
+<line x1="440.0" y1="485" x2="440.0" y2="765" stroke="#edf0f2"/>
+<text x="440.0" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">256</text>
+<polyline points="65.0,515.0 158.8,708.2 252.5,750.6 346.2,764.5 440.0,765.0" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="65.0" cy="515.0" r="4" fill="#c45624"/>
+<circle cx="158.8" cy="708.2" r="4" fill="#c45624"/>
+<circle cx="252.5" cy="750.6" r="4" fill="#c45624"/>
+<circle cx="346.2" cy="764.5" r="4" fill="#c45624"/>
+<circle cx="440.0" cy="765.0" r="4" fill="#c45624"/>
+<text x="252.5" y="813" text-anchor="middle" font-family="Arial" font-size="12" fill="#52616b">MPI ranks (log2 scale)</text>
+<text x="707.5" y="458" text-anchor="middle" font-family="Arial" font-size="16" fill="#26343e">CG iterations (count)</text>
+<line x1="520" y1="765.0" x2="895" y2="765.0" stroke="#e0e5e8"/>
+<text x="513" y="769.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">0</text>
+<line x1="520" y1="695.0" x2="895" y2="695.0" stroke="#e0e5e8"/>
+<text x="513" y="699.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">963</text>
+<line x1="520" y1="625.0" x2="895" y2="625.0" stroke="#e0e5e8"/>
+<text x="513" y="629.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">1.93e+03</text>
+<line x1="520" y1="555.0" x2="895" y2="555.0" stroke="#e0e5e8"/>
+<text x="513" y="559.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">2.89e+03</text>
+<line x1="520" y1="485.0" x2="895" y2="485.0" stroke="#e0e5e8"/>
+<text x="513" y="489.0" text-anchor="end" font-family="Arial" font-size="11" fill="#52616b">3.85e+03</text>
+<line x1="520.0" y1="485" x2="520.0" y2="765" stroke="#edf0f2"/>
+<text x="520.0" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">1</text>
+<line x1="566.9" y1="485" x2="566.9" y2="765" stroke="#edf0f2"/>
+<text x="566.9" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">2</text>
+<line x1="613.8" y1="485" x2="613.8" y2="765" stroke="#edf0f2"/>
+<text x="613.8" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">4</text>
+<line x1="660.6" y1="485" x2="660.6" y2="765" stroke="#edf0f2"/>
+<text x="660.6" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">8</text>
+<line x1="707.5" y1="485" x2="707.5" y2="765" stroke="#edf0f2"/>
+<text x="707.5" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">16</text>
+<line x1="754.4" y1="485" x2="754.4" y2="765" stroke="#edf0f2"/>
+<text x="754.4" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">32</text>
+<line x1="801.2" y1="485" x2="801.2" y2="765" stroke="#edf0f2"/>
+<text x="801.2" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">64</text>
+<line x1="848.1" y1="485" x2="848.1" y2="765" stroke="#edf0f2"/>
+<text x="848.1" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">128</text>
+<line x1="895.0" y1="485" x2="895.0" y2="765" stroke="#edf0f2"/>
+<text x="895.0" y="785" text-anchor="middle" font-family="Arial" font-size="11" fill="#52616b">256</text>
+<polyline points="520.0,748.2 613.8,732.0 707.5,700.0 801.2,637.4 895.0,515.0" fill="none" stroke="#087e8b" stroke-width="2.5"/>
+<circle cx="520.0" cy="748.2" r="4" fill="#c45624"/>
+<circle cx="613.8" cy="732.0" r="4" fill="#c45624"/>
+<circle cx="707.5" cy="700.0" r="4" fill="#c45624"/>
+<circle cx="801.2" cy="637.4" r="4" fill="#c45624"/>
+<circle cx="895.0" cy="515.0" r="4" fill="#c45624"/>
+<text x="707.5" y="813" text-anchor="middle" font-family="Arial" font-size="12" fill="#52616b">MPI ranks (log2 scale)</text>
+<text x="490" y="870" text-anchor="middle" font-family="Arial" font-size="13" fill="#26343e">16,384 unknowns/rank; baseline: 1-rank mean in job 1509067; efficiency = baseline / P-rank mean</text>
+</svg>

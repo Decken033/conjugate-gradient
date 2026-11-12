@@ -269,7 +269,7 @@ if(BUILD_TESTING)
     )
 
     # MPI tests require MPI library and mpiexec launcher.
-    # Each test is run with 4 MPI ranks to verify distributed correctness.
+    # Register bounded normal, uneven/empty-partition and error-path checks.
     if(CG_MPI_AVAILABLE)
         # MPI partition correctness: row distribution and gather/scatter
         add_executable(test_mpi_partition
@@ -320,6 +320,37 @@ if(BUILD_TESTING)
                     $<TARGET_FILE:test_mpi_cg>
                     ${MPIEXEC_POSTFLAGS}
         )
+        set_tests_properties(mpi_partition mpi_spmv mpi_cg PROPERTIES TIMEOUT 90)
+        add_executable(test_mpi_benchmark_safety tests/test_mpi_benchmark_safety.cpp)
+        target_link_libraries(test_mpi_benchmark_safety PRIVATE cg_mpi_benchmark cg_poisson)
+        add_executable(test_mpi_ops_safety tests/test_mpi_ops_safety.cpp)
+        target_link_libraries(test_mpi_ops_safety PRIVATE cg_mpi_ops)
+        foreach(ranks 1 2 4)
+            add_test(NAME mpi_ops_safety_${ranks}
+                COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${ranks}
+                        ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi_ops_safety>
+                        ${MPIEXEC_POSTFLAGS})
+            set_tests_properties(mpi_ops_safety_${ranks} PROPERTIES TIMEOUT 90)
+            add_test(NAME mpi_safety_${ranks}
+                COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${ranks}
+                        ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi_benchmark_safety>
+                        ${MPIEXEC_POSTFLAGS})
+            set_tests_properties(mpi_safety_${ranks} PROPERTIES TIMEOUT 90)
+        endforeach()
+        add_test(NAME mpi_cg_single
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1
+                    ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi_cg> ${MPIEXEC_POSTFLAGS})
+        set_tests_properties(mpi_cg_single PROPERTIES TIMEOUT 90)
+        find_package(Python3 COMPONENTS Interpreter QUIET)
+        if(Python3_Interpreter_FOUND AND NOT MPIEXEC_PREFLAGS AND NOT MPIEXEC_POSTFLAGS)
+            add_test(NAME mpi_runner_safety
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/check_mpi_runner.py
+                        --launcher=${MPIEXEC_EXECUTABLE} --numproc-flag=${MPIEXEC_NUMPROC_FLAG}
+                        --runner=$<TARGET_FILE:run_mpi_benchmark> --ranks=4)
+            set_tests_properties(mpi_runner_safety PROPERTIES TIMEOUT 160)
+        else()
+            message(STATUS "MPI runner integration test needs Python3 and a launcher without extra flags")
+        endif()
     endif()
 endif()
 

@@ -5,3 +5,8 @@ scripts/vanda/benchmark_serial_scaling.pbs text eol=lf
 
 # Preserve the downloaded GPU evidence exactly, including historical configuration.
 results/gpu_evidence/* -text
+
+# Preserve exact bytes for imported MPI experiment evidence and its SHA-256 manifest.
+# Original CRLF/trailing spacing is evidence, not source formatting to rewrite.
+results/mpi/** -text -whitespace
+docs/task_b/evidence/scripts/*.pbs -text -whitespace

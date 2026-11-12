@@ -43,6 +43,29 @@ core.*
 results/*
 !results/.gitkeep
 
+# Curated Task B evidence only; keep other generated/partial runs ignored.
+!results/mpi/
+results/mpi/*
+!results/mpi/mpi_2d512_p*_1482451.stdct-mgmt-02.csv
+!results/mpi/mpi_2d1024_p*_1482491.stdct-mgmt-02.csv
+!results/mpi/thermal2/
+results/mpi/thermal2/*
+!results/mpi/thermal2/thermal2_p*_1495684.stdct-mgmt-02.csv
+!results/mpi/3d/
+results/mpi/3d/*
+!results/mpi/3d/mpi_3d*_p*_1502451.stdct-mgmt-02.csv
+!results/mpi/extension/
+results/mpi/extension/*
+!results/mpi/extension/strong_1509066.stdct-mgmt-02/
+!results/mpi/extension/weak_1509067.stdct-mgmt-02/
+!results/mpi/extension/analysis/
+results/mpi/extension/analysis/*
+!results/mpi/extension/analysis/*_summary.csv
+!results/mpi/extension/analysis/*_scaling.svg
+!results/mpi/extension/analysis/*_scaling.png
+!results/mpi/evidence/
+!results/mpi/evidence/logs/*.o[0-9]*
+
 # Downloaded or generated matrices
 data/*
 !data/.gitkeep

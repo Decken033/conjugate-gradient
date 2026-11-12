@@ -1,0 +1,188 @@
+Loading CMake/3.27.6-GCCcore-13.2.0
+  Loading requirement: GCCcore/13.2.0 ncurses/6.4-GCCcore-13.2.0
+    zlib/1.2.13-GCCcore-13.2.0 bzip2/1.0.8-GCCcore-13.2.0 OpenSSL/1.1
+    cURL/8.3.0-GCCcore-13.2.0 XZ/5.4.4-GCCcore-13.2.0
+    libarchive/3.7.2-GCCcore-13.2.0
+Loading OpenMPI/4.1.6-GCC-13.2.0
+  Loading requirement: binutils/2.40-GCCcore-13.2.0 GCC/13.2.0
+    numactl/2.0.16-GCCcore-13.2.0 libxml2/2.11.5-GCCcore-13.2.0
+    libpciaccess/0.17-GCCcore-13.2.0 hwloc/2.9.2-GCCcore-13.2.0
+    libevent/2.1.12-GCCcore-13.2.0 UCX/1.15.0-GCCcore-13.2.0
+    libfabric/1.19.0-GCCcore-13.2.0 PMIx/4.2.6-GCCcore-13.2.0
+    UCC/1.2.0-GCCcore-13.2.0
+-- MPI found: /app1/ebapps/arches/flat-avx2/software/OpenMPI/4.1.6-GCC-13.2.0/bin/mpicxx
+-- MPI CG targets: cg_mpi_ops, cg_mpi, cg_mpi_benchmark, run_mpi_benchmark
+-- Configuring done (2.2s)
+-- Generating done (3.4s)
+-- Build files have been written to: /scratch/diqingxu/DSA5208/conjugate-gradient/build
+[ 21%] Building CXX object CMakeFiles/cg_mpi_ops.dir/src/mpi/mpi_partition.cpp.o
+[ 21%] Built target cg_poisson
+[ 28%] Building CXX object CMakeFiles/cg_mpi_ops.dir/src/mpi/mpi_ops.cpp.o
+[ 42%] Built target cg_matrix_market
+[ 50%] Linking CXX static library libcg_mpi_ops.a
+[ 50%] Built target cg_mpi_ops
+[ 57%] Building CXX object CMakeFiles/cg_mpi.dir/src/mpi/mpi_solver.cpp.o
+[ 64%] Linking CXX static library libcg_mpi.a
+[ 64%] Built target cg_mpi
+[ 71%] Building CXX object CMakeFiles/cg_mpi_benchmark.dir/src/mpi/benchmark_mpi.cpp.o
+[ 78%] Building CXX object CMakeFiles/cg_mpi_benchmark.dir/src/mpi/benchmark_mpi_csv.cpp.o
+[ 85%] Linking CXX static library libcg_mpi_benchmark.a
+[ 85%] Built target cg_mpi_benchmark
+[ 92%] Building CXX object CMakeFiles/run_mpi_benchmark.dir/src/mpi/run_mpi_benchmark.cpp.o
+[100%] Linking CXX executable run_mpi_benchmark
+[100%] Built target run_mpi_benchmark
+=== thermal2 with 1 MPI ranks ===
+[CN-115:2568210] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-115:2568210] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Loading Matrix Market: data/thermal2/thermal2.mtx
+Matrix: N=1228045 NNZ=8580313
+Distributing matrix to 1 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] thermal2
+[warmup 2/4] thermal2
+[warmup 3/4] thermal2
+[warmup 4/4] thermal2
+[run 1/10] thermal2
+[run 2/10] thermal2
+[run 3/10] thermal2
+[run 4/10] thermal2
+[run 5/10] thermal2
+[run 6/10] thermal2
+[run 7/10] thermal2
+[run 8/10] thermal2
+[run 9/10] thermal2
+[run 10/10] thermal2
+
+Results written to: results/mpi/thermal2/thermal2_p1_1495684.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 1
+Runs: 10
+Converged: 10/10
+Median solve time: 88.5267 s
+Iterations: 4333
+True rel. residual: 9.8606e-09
+=== thermal2 with 2 MPI ranks ===
+[CN-115:2569690] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-115:2569690] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Loading Matrix Market: data/thermal2/thermal2.mtx
+Matrix: N=1228045 NNZ=8580313
+Distributing matrix to 2 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] thermal2
+[warmup 2/4] thermal2
+[warmup 3/4] thermal2
+[warmup 4/4] thermal2
+[run 1/10] thermal2
+[run 2/10] thermal2
+[run 3/10] thermal2
+[run 4/10] thermal2
+[run 5/10] thermal2
+[run 6/10] thermal2
+[run 7/10] thermal2
+[run 8/10] thermal2
+[run 9/10] thermal2
+[run 10/10] thermal2
+
+Results written to: results/mpi/thermal2/thermal2_p2_1495684.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 2
+Runs: 10
+Converged: 10/10
+Median solve time: 45.0989 s
+Iterations: 4333
+True rel. residual: 9.84322e-09
+=== thermal2 with 4 MPI ranks ===
+[CN-115:2570133] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-115:2570133] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Loading Matrix Market: data/thermal2/thermal2.mtx
+Matrix: N=1228045 NNZ=8580313
+Distributing matrix to 4 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] thermal2
+[warmup 2/4] thermal2
+[warmup 3/4] thermal2
+[warmup 4/4] thermal2
+[run 1/10] thermal2
+[run 2/10] thermal2
+[run 3/10] thermal2
+[run 4/10] thermal2
+[run 5/10] thermal2
+[run 6/10] thermal2
+[run 7/10] thermal2
+[run 8/10] thermal2
+[run 9/10] thermal2
+[run 10/10] thermal2
+
+Results written to: results/mpi/thermal2/thermal2_p4_1495684.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 4
+Runs: 10
+Converged: 10/10
+Median solve time: 31.0989 s
+Iterations: 4332
+True rel. residual: 9.96574e-09
+=== thermal2 with 8 MPI ranks ===
+[CN-115:2570521] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-115:2570521] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Loading Matrix Market: data/thermal2/thermal2.mtx
+Matrix: N=1228045 NNZ=8580313
+Distributing matrix to 8 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] thermal2
+[warmup 2/4] thermal2
+[warmup 3/4] thermal2
+[warmup 4/4] thermal2
+[run 1/10] thermal2
+[run 2/10] thermal2
+[run 3/10] thermal2
+[run 4/10] thermal2
+[run 5/10] thermal2
+[run 6/10] thermal2
+[run 7/10] thermal2
+[run 8/10] thermal2
+[run 9/10] thermal2
+[run 10/10] thermal2
+
+Results written to: results/mpi/thermal2/thermal2_p8_1495684.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 8
+Runs: 10
+Converged: 10/10
+Median solve time: 25.6916 s
+Iterations: 4331
+True rel. residual: 9.98619e-09
+=== thermal2 with 16 MPI ranks ===
+[CN-115:2570867] mca_base_component_repository_open: unable to open mca_plm_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+[CN-115:2570867] mca_base_component_repository_open: unable to open mca_ras_tm: libpbs.so.0: cannot open shared object file: No such file or directory (ignored)
+Loading Matrix Market: data/thermal2/thermal2.mtx
+Matrix: N=1228045 NNZ=8580313
+Distributing matrix to 16 ranks...
+Partition complete. Starting benchmark...
+[warmup 1/4] thermal2
+[warmup 2/4] thermal2
+[warmup 3/4] thermal2
+[warmup 4/4] thermal2
+[run 1/10] thermal2
+[run 2/10] thermal2
+[run 3/10] thermal2
+[run 4/10] thermal2
+[run 5/10] thermal2
+[run 6/10] thermal2
+[run 7/10] thermal2
+[run 8/10] thermal2
+[run 9/10] thermal2
+[run 10/10] thermal2
+
+Results written to: results/mpi/thermal2/thermal2_p16_1495684.stdct-mgmt-02.csv
+
+=== Summary ===
+Ranks: 16
+Runs: 10
+Converged: 10/10
+Median solve time: 28.1827 s
+Iterations: 4332
+True rel. residual: 9.93796e-09
