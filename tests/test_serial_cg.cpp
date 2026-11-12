@@ -1,7 +1,7 @@
 
-#include "cg_solver.hpp"
-#include "csr_ops.hpp"
-#include "poisson.hpp"
+#include "serial/cg_solver.hpp"
+#include "common/csr_ops.hpp"
+#include "common/poisson.hpp"
 
 
 #include <cassert>

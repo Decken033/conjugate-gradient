@@ -13,9 +13,9 @@
  * Run with 4 ranks: mpirun -n 4 ./test_mpi_partition
  */
 
-#include "mpi_partition.hpp"
-#include "csr_matrix.hpp"
-#include "poisson.hpp"
+#include "mpi/mpi_partition.hpp"
+#include "common/csr_matrix.hpp"
+#include "common/poisson.hpp"
 
 #include <mpi.h>
 #include <cassert>

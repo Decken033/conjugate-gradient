@@ -11,10 +11,10 @@
  * so checks remain active in Release builds.
  */
 
-#include "cg_solver.hpp"
-#include "csr_ops.hpp"
-#include "openmp_solver.hpp"
-#include "poisson.hpp"
+#include "serial/cg_solver.hpp"
+#include "common/csr_ops.hpp"
+#include "openmp/openmp_solver.hpp"
+#include "common/poisson.hpp"
 
 #include <cmath>
 #include <iostream>

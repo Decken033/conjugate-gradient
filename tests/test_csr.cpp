@@ -1,5 +1,5 @@
 
-#include "csr_matrix.hpp"
+#include "common/csr_matrix.hpp"
 
 #include <cassert>
 #include <iostream>

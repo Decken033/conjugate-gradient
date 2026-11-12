@@ -1,5 +1,5 @@
 
-#include "serial_benchmark.hpp"
+#include "serial/serial_benchmark.hpp"
 
 #include <cassert>
 #include <cmath>

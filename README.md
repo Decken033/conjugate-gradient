@@ -189,26 +189,26 @@ conjugate-gradient/
 │       ├── figures/                # Four report-ready charts
 │       └── consolidated/           # Selected consolidated CSVs
 ├── include/
-│   ├── csr_matrix.hpp
-│   ├── csr_ops.hpp
-│   ├── cg_solver.hpp
-│   ├── poisson.hpp
-│   ├── matrix_market.hpp
-│   ├── serial_benchmark.hpp
-│   ├── openmp_ops.hpp
-│   ├── openmp_solver.hpp
-│   └── openmp_benchmark.hpp
+│   ├── common/                   # Shared CSR storage, operations and loaders
+│   ├── serial/                   # Serial solver and benchmark interfaces
+│   ├── openmp/                   # CPU OpenMP interfaces
+│   ├── mpi/                      # MPI interfaces
+│   ├── hybrid/                   # Hybrid MPI + OpenMP interfaces
+│   └── gpu/                      # Optional GPU interfaces
 ├── src/
 │   ├── common/                     # Matrix/vector utilities and loaders
 │   ├── serial/                     # Serial solver and benchmarks
-│   └── openmp/                     # CPU OpenMP solver and benchmarks
-├── tests/                          # Seven CTest targets in verified build
+│   ├── openmp/                     # CPU OpenMP solver and benchmarks
+│   ├── mpi/                        # MPI solver and benchmarks
+│   ├── hybrid/                     # Hybrid MPI + OpenMP implementation
+│   └── gpu/                        # Optional GPU implementation
+├── tests/                          # CTest correctness checks
 ├── scripts/vanda/                  # Reproducible PBS scaling jobs
 ├── data/                           # Downloaded matrices (ignored)
 └── results/                        # Generated per-run CSVs (ignored by default)
 ```
 
-MPI/hybrid directories may be added or updated independently by teammates. The `docs/task_a` report artifacts are selected documentation outputs, not a replacement for the complete local HPC archive.
+The `docs/task_a` report artifacts are selected documentation outputs, not a replacement for the complete local HPC archive.
 
 ### Person B MPI structure
 
@@ -216,10 +216,11 @@ MPI/hybrid directories may be added or updated independently by teammates. The `
 conjugate-gradient/
 ├── REPORT_TASK_B.md               # Person B report (MPI CG)
 ├── include/
-│   ├── mpi_partition.hpp          # Distributed CSR matrix partitioning
-│   ├── mpi_ops.hpp                # Distributed SpMV, dot, norm, vector ops
-│   ├── mpi_solver.hpp             # MPI CG solver interface
-│   └── mpi_benchmark.hpp         # MPI benchmark harness
+│   └── mpi/
+│       ├── mpi_partition.hpp      # Distributed CSR matrix partitioning
+│       ├── mpi_ops.hpp            # Distributed SpMV, dot, norm, vector ops
+│       ├── mpi_solver.hpp         # MPI CG solver interface
+│       └── mpi_benchmark.hpp      # MPI benchmark harness
 ├── src/mpi/                       # MPI source implementations
 │   ├── mpi_partition.cpp
 │   ├── mpi_ops.cpp

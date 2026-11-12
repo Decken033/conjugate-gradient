@@ -13,8 +13,8 @@
  * - Input validation and invalid configurations
  */
 
-#include "csr_ops.hpp"
-#include "openmp_ops.hpp"
+#include "common/csr_ops.hpp"
+#include "openmp/openmp_ops.hpp"
 
 #include <cmath>
 #include <iostream>

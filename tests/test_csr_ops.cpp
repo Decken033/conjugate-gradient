@@ -10,7 +10,7 @@
  * incompatible vector dimensions.
  */
 
-#include "csr_ops.hpp"
+#include "common/csr_ops.hpp"
 
 #include <cmath>
 #include <iostream>

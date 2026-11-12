@@ -12,7 +12,7 @@ Person B implemented a C++17, double-precision, unpreconditioned distributed-mem
 
 CG addresses sparse symmetric positive definite systems through SpMV, vector updates and inner products [1], [2]. Task B covers CSR row partitioning and vector scatter/gather; distributed SpMV, dot product, and local vector updates; unpreconditioned MPI CG with true-residual verification; MPI CMake targets, correctness tests, CSV benchmarking, and Vanda PBS jobs. The shared Poisson generators already exist in common project code and are reused here; this report does not claim their authorship or Person A's Serial/OpenMP results. The modular `cg_mpi_ops` library can be reused by a hybrid solver, but no hybrid implementation is claimed as a Task B deliverable.
 
-Key files are `include/mpi_partition.hpp`, `include/mpi_ops.hpp`, `include/mpi_solver.hpp`, `include/mpi_benchmark.hpp`, `src/mpi/*.cpp`, `tests/test_mpi_{partition,spmv,cg}.cpp`, MPI sections of `CMakeLists.txt`, and the PBS scripts in `scripts/vanda/` for tests and scaling campaigns.
+Key files are `include/mpi/mpi_partition.hpp`, `include/mpi/mpi_ops.hpp`, `include/mpi/mpi_solver.hpp`, `include/mpi/mpi_benchmark.hpp`, `src/mpi/*.cpp`, `tests/test_mpi_{partition,spmv,cg}.cpp`, MPI sections of `CMakeLists.txt`, and the PBS scripts in `scripts/vanda/` for tests and scaling campaigns.
 
 ## 2. Conjugate Gradient and MPI Implementation
 

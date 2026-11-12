@@ -14,13 +14,13 @@
  * Run with 4 ranks: mpirun -n 4 ./test_mpi_cg
  */
 
-#include "mpi_partition.hpp"
-#include "mpi_ops.hpp"
-#include "mpi_solver.hpp"
-#include "cg_solver.hpp"
-#include "poisson.hpp"
-#include "csr_matrix.hpp"
-#include "csr_ops.hpp"
+#include "mpi/mpi_partition.hpp"
+#include "mpi/mpi_ops.hpp"
+#include "mpi/mpi_solver.hpp"
+#include "serial/cg_solver.hpp"
+#include "common/poisson.hpp"
+#include "common/csr_matrix.hpp"
+#include "common/csr_ops.hpp"
 
 #include <mpi.h>
 #include <cassert>

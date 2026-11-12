@@ -12,7 +12,7 @@ Person B 基于按行划分的 CSR 矩阵，实现了 C++17 双精度、无预�
 
 Task B 涵盖 CSR 按行划分和向量散发/汇集、分布式 SpMV 与内积及本地向量更新、带真实残差验证的无预条件 MPI CG、MPI CMake 构建目标、正确性测试、CSV 基准测试，以及 Vanda PBS 作业。共享 Poisson 矩阵生成器已存在于项目公共代码中，本实现复用它；本报告不将其或 Person A 的串行/OpenMP 成果归于 Person B。模块化的 `cg_mpi_ops` 可供混合并行求解器复用，但 Task B 不声称已实现混合求解器。
 
-主要文件包括 `include/mpi_partition.hpp`、`include/mpi_ops.hpp`、`include/mpi_solver.hpp`、`include/mpi_benchmark.hpp`、`src/mpi/*.cpp`、`tests/test_mpi_{partition,spmv,cg}.cpp`、`CMakeLists.txt` 中的 MPI 配置，以及 `scripts/vanda/` 中用于测试和扩展实验的 PBS 脚本。
+主要文件包括 `include/mpi/mpi_partition.hpp`、`include/mpi/mpi_ops.hpp`、`include/mpi/mpi_solver.hpp`、`include/mpi/mpi_benchmark.hpp`、`src/mpi/*.cpp`、`tests/test_mpi_{partition,spmv,cg}.cpp`、`CMakeLists.txt` 中的 MPI 配置，以及 `scripts/vanda/` 中用于测试和扩展实验的 PBS 脚本。
 
 ## 2. 实现
 
