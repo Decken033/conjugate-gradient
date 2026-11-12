@@ -95,7 +95,7 @@
 
 ## Integration with Person A's Code
 
-- **Shared-code change:** `include/csr_matrix.hpp` adds the MPI-aware size-type mapping needed by shared validation; serial/OpenMP solver algorithms were not changed for Task B
+- **Shared-code change:** `include/common/csr_matrix.hpp` adds the MPI-aware size-type mapping needed by shared validation; serial/OpenMP solver algorithms were not changed for Task B
 - **CMake integration:** new MPI targets behind an optional MPI flag
 - **Shared libraries reused**: cg_ops, cg_poisson, cg_matrix_market
 - **Compatible CSV fields:** common 12-column schema; timer differences still apply to cross-solver comparisons

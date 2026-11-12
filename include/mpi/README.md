@@ -1,3 +1,8 @@
 ﻿# MPI CG Interfaces
 
-Place public MPI solver and benchmark headers here. No interfaces are defined yet.
+Public MPI interfaces are grouped here alongside the corresponding `src/mpi/` implementations:
+
+- `mpi_partition.hpp`: distributed CSR partitioning and gather/scatter operations.
+- `mpi_ops.hpp`: distributed matrix-vector and vector operations.
+- `mpi_solver.hpp`: MPI conjugate-gradient solver.
+- `mpi_benchmark.hpp`: benchmark records and CSV output.
