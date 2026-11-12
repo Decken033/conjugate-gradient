@@ -1,3 +1,5 @@
+> Historical context: source paths and unified-build commands describe the original revisions. For current independent builds and experiments, use the [standalone submission README](../../../README.md). Removed paths and archived snapshots are recorded in docs/archive/cleanup_manifest.json (repository-relative). Historical results are not verification of the standalone packages.
+
 # Task B: recovered Vanda experiment evidence
 
 ## Scope and provenance
@@ -28,7 +30,7 @@ Earlier job 1482438, validation/smoke CSVs and partial attempts are excluded fro
 - `benchmark_mpi_thermal2.pbs`: recovered script uses `data/thermal2/thermal2.mtx`, matching the log. The active `scripts/vanda/benchmark_mpi_thermal2.pbs` instead uses `data/suitesparse/thermal2/thermal2.mtx`; preserve that distinction. The historical missing-file hint still names the other staging path; it is intentionally not edited in the snapshot.
 - The two 2D scripts, strong/weak 256-rank scripts and correctness script are also retained for context. Historical MPI module/build-cache inconsistencies remain documented in the report.
 
-`scripts/vanda/benchmark_mpi_3d_reproduce.pbs` is a separately authored reproduction recipe, NOT the recovered script. Adapt account/scratch/input settings before submitting any recipe and use fresh output filenames; the CSV writer truncates existing paths. No job was submitted during this import.
+`docs/archive/vanda/benchmark_mpi_3d_reproduce.pbs` is a separately authored reproduction recipe, NOT the recovered script. Adapt account/scratch/input settings before submitting any recipe and use fresh output filenames; the CSV writer truncates existing paths. No job was submitted during this import.
 
 ## Logs and limitations
 

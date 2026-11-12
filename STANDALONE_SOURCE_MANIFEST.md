@@ -1,3 +1,5 @@
+> Historical context: source paths and unified-build commands describe the original revisions. For current independent builds and experiments, use the [standalone submission README](README.md). Removed paths and archived snapshots are recorded in docs/archive/cleanup_manifest.json (repository-relative). Historical results are not verification of the standalone packages.
+
 # Standalone submission preparation manifest
 
 Preparation only. No source migration, build configuration rewrite, numerical change, timing change, commit or push has been performed. File tables identify existing Git objects; they are not claims of runtime verification. Paths are relative to the source repository at the stated revision.
