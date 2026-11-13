@@ -9,4 +9,6 @@ The final Task C/team report is unavailable. Both variants are preserved as iden
 
 See [SOURCE_PROVENANCE.md](SOURCE_PROVENANCE.md) for every copied path, revision and Git blob. No numerical, operation, benchmark timing or profiling source contents were changed. CMake/README files are packaging-only; test assertions and bounded launch timeouts affect test execution only.
 
-BUILD AND RUNTIME NOT VERIFIED locally. Historical MPI failure-path limitations are retained; use valid identical arguments and bounded tests in appropriate compute allocations. Report source equivalence separately from future runtime verification.
+Independent verification on NUS Vanda on 13 November 2026 confirmed successful standalone builds and all three registered CTests passing for each variant (six Task C tests in total). Both variants also completed representative Hybrid MPI/OpenMP benchmark smoke tests. The V1 profiler generated per-rank CSV files and its aggregation script completed successfully. See [Vanda verification](../docs/VANDA_VERIFICATION_2026-11-13.md).
+
+These checks establish functional execution of the tested configurations, not reproduction of historical performance claims. The exact profiled V0 source remains unavailable, and recorded Task C results do not establish execution on thermal2. Historical MPI failure-path limitations remain; use identical valid arguments and appropriate compute allocations.

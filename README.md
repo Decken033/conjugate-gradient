@@ -119,7 +119,9 @@ Expected header: `%%MatrixMarket matrix coordinate real symmetric`. The historic
 
 Task A and historical Task B derive from 56ac360; Task B retains its documented three safety deviations outside the normal timed solver operations. Task C handoff derives from 56ac360 and V1 from 846239d. Protected integration work remains available separately. Profiled V0 source provenance and the final Task C report remain unresolved; neither variant reconstructs V0-to-V1 speedups. Complete original Task A scheduling scripts/raw OpenMP evidence and some historical build/placement fingerprints remain missing. Exact historical timing identity is not promised.
 
-Standalone compilation and runtime are **NOT VERIFIED** in the cleanup environment. Historical reports describe historical executions, not tests of these packages. Original Task C MPI failure-path limitations remain; use identical valid arguments and appropriate allocations.
+Independent standalone compilation and runtime verification was completed on NUS Vanda on 13 November 2026. All four CPU packages built successfully, all 24 CPU CTests passed, and the Task A GPU build and correctness test passed on an NVIDIA A40. Representative benchmark executions, CSV generation, Task C V1 profiling, and actual CUDA kernel launches were verified. See [Vanda verification results](docs/VANDA_VERIFICATION_2026-11-13.md) for commands, numerical results, environment details, and limitations.
+
+For the verified NVHPC 24.7 GPU build, an explicit `-DCMAKE_CXX_FLAGS="--gcc-toolchain=$(which gcc)"` was required to resolve GCC startup-object paths on the tested Vanda node. See the verification report and Task A README. Historical performance campaigns were not reproduced in full; the profiled Task C V0 source remains unavailable. Original Task C MPI failure-path limitations remain; use identical valid arguments and appropriate allocations.
 
 From the repository root, these Python checks validate archived evidence only:
 
