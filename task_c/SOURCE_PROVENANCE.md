@@ -8,7 +8,11 @@ CMake files and READMEs are new packaging. MPI/OpenMP are mandatory; original pr
 
 The two variants are not substitutes for profiled V0. No exact V0 source-to-result mapping has been recovered. The final report is unavailable. CSVs/profile outputs are provenance evidence, not build or runtime inputs. Caught/uncaught historical MPI error paths are unchanged and have not been certified safe. Use valid matching arguments and bounded allocated-node tests.
 
-BUILD AND RUNTIME NOT VERIFIED. Verification passed: all 66 copied files match original Git blobs (24 handoff, 42 V1); project includes and CMake source paths resolve independently; the original Bash script passes bash -n and the Python summarizer passes syntax parsing; tracked and untracked whitespace checks pass. Native Windows and WSL probes found no usable CMake/C++/MPI compiler toolchain. No historical measurements are fabricated.
+Migration-stage static verification passed: all 66 copied files matched original Git blobs (24 handoff, 42 V1); project includes and CMake source paths resolved independently; the original Bash script passed bash -n and the Python summarizer passed syntax parsing; tracked and untracked whitespace checks passed. Native Windows and WSL probes lacked a usable CMake/C++/MPI compiler toolchain at that stage. No historical measurements were fabricated.
+
+Subsequent independent verification on NUS Vanda on 13 November 2026 confirmed that the handoff variant compiled independently and passed 3/3 CTests, and the V1 profiling variant compiled independently and passed 3/3 CTests. Both completed representative Hybrid MPI/OpenMP benchmark smoke tests. V1 generated per-rank profiling CSVs, and profile aggregation completed successfully. See [Vanda verification](../docs/VANDA_VERIFICATION_2026-11-13.md).
+
+The exact profiled V0 source remains unresolved. Historical handoff and V1 timings are not interchangeable, and full historical V0-to-V1 speedups were not reproduced. No recorded evidence establishes that Member C's Hybrid implementation was benchmarked on thermal2. Original MPI failure-path limitations remain; these functional checks do not certify every failure scenario.
 
 | Destination under task_c | Revision | Original path | Git blob |
 |---|---|---|---|
