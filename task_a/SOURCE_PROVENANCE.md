@@ -22,7 +22,11 @@ Task A scaling recipes preserve recorded workload parameters. Machine allocation
 
 ## Verification
 
-Byte comparisons: PASS (35 files). Local quoted-include closure: PASS. Build-source and link dependency inspection: Task A only. Native Windows and WSL probes found no CMake/C++ compiler toolchain; compilation, CTest execution, CPU numerical runtime and GPU offloading are NOT VERIFIED. All four PBS scripts passed bash -n through WSL. git diff --check and per-file untracked whitespace checks passed (Git emitted line-ending conversion notices); no benchmark measurements were generated.
+Migration-stage checks passed: byte comparisons (35 files), local quoted-include closure, Task A-only build-source and link dependency inspection, all four PBS scripts via bash -n through WSL, git diff --check and per-file untracked whitespace checks. Native Windows and WSL probes lacked a CMake/C++ compiler toolchain at that stage; no benchmark measurements were generated during migration.
+
+Subsequent independent verification on NUS Vanda on 13 November 2026 confirmed a successful CPU build and all seven CPU CTests passing. The GPU build succeeded with NVHPC 24.7 on an NVIDIA A40, and the GPU correctness CTest passed (1/1). Serial, OpenMP and GPU benchmark smoke tests converged. Actual GPU kernel launches were confirmed using NVCOMPILER_ACC_NOTIFY=1. The tested NVHPC environment required an explicit --gcc-toolchain override to resolve GCC startup-object paths; this is environment-specific. See [Vanda verification](../docs/VANDA_VERIFICATION_2026-11-13.md).
+
+These results establish functional verification of the tested configurations, not full reproduction of the historical benchmark campaigns. Historical source/build qualifications above remain unchanged.
 
 ## Exact preserved file inventory
 

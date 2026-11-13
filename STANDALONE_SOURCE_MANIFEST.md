@@ -1,3 +1,5 @@
+> **Historical preparation-stage manifest:** This document records the repository preparation state when it was authored, not the current runtime verification status. Statements such as "NOT VERIFIED" and "not yet implemented" describe that earlier stage. Independent packaging and NUS Vanda functional verification were subsequently completed. See the [13 November 2026 Vanda verification results](docs/VANDA_VERIFICATION_2026-11-13.md) for the latest recorded verification and [README.md](README.md) for current standalone package instructions. Original preparation facts, inventories and source-selection reasoning below are retained unchanged.
+
 > Historical context: source paths and unified-build commands describe the original revisions. For current independent builds and experiments, use the [standalone submission README](README.md). Removed paths and archived snapshots are recorded in docs/archive/cleanup_manifest.json (repository-relative). Historical results are not verification of the standalone packages.
 
 # Standalone submission preparation manifest
