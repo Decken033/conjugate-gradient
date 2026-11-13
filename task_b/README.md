@@ -1,6 +1,6 @@
 # Task B: standalone historical MPI Conjugate Gradient
 
-This package uses production sources from `56ac360` with three narrowly scoped safety patches. It builds independently of Tasks A and C, without OpenMP or GPU libraries. Historical CSVs/logs are not runtime inputs. Compilation and MPI runtime are NOT VERIFIED in this migration environment.
+This package uses production sources from `56ac360` with three narrowly scoped safety patches. It builds independently of Tasks A and C, without OpenMP or GPU libraries. Historical CSVs/logs are not runtime inputs. Independent verification on NUS Vanda on 13 November 2026 confirmed successful standalone compilation, all 11 registered CTests passing, and a converged two-rank MPI benchmark smoke test. See [Vanda verification](../docs/VANDA_VERIFICATION_2026-11-13.md).
 
 ## Environment and build
 
@@ -29,7 +29,7 @@ ctest --test-dir build --output-on-failure --no-tests=error -j 1
 
 Nine original correctness registrations run partition, SpMV and CG tests at 1, 2 and 4 ranks. A new four-rank benchmark regression uses nine rows, producing an empty final rank; it checks zero-iteration nonconvergence records and a subsequent valid solve. Each has a 90-second CTest timeout.
 
-The new Python runner test launches the actual executable, checks successful CSV output, invalid arguments, setup/output failures, and MPMD mismatches. A real successful two-rank MPMD solve and its CSV must pass before negative MPMD tests. Each subprocess is limited to 25 seconds (version probe 10 seconds); CTest limits the suite to 360 seconds. Negative cases require both nonzero status and application diagnostics; launcher failures do not count as passing tests. These tests have been statically checked, not executed with MPI here.
+The new Python runner test launches the actual executable, checks successful CSV output, invalid arguments, setup/output failures, and MPMD mismatches. A real successful two-rank MPMD solve and its CSV must pass before negative MPMD tests. Each subprocess is limited to 25 seconds (version probe 10 seconds); CTest limits the suite to 360 seconds. Negative cases require both nonzero status and application diagnostics; launcher failures do not count as passing tests. These tests were executed successfully with MPI on NUS Vanda during the 13 November 2026 standalone verification.
 
 The recovered scripts/test_mpi_correctness.pbs retains its original openmpi/gcc/64/4.1.8 module, which differs from benchmark recipes. Use a fresh build directory/cache when switching module families. Its additional original manual launches are bounded by PBS walltime, not by CTest's per-test timeout.
 
@@ -100,6 +100,6 @@ MPI records have threads=1 and zero-based run_index. solve_seconds is the maximu
 
 Check all convergence flags and true residuals before using timings. Measured nonconvergence preserves CSV records but now produces a shared nonzero application exit status. Numerical breakdown throws and aborts instead; CSV completion is not promised for fatal errors. Warmup nonconvergence remains a warning as in the original.
 
-Safety scope is the supplied runner, not a fully hardened library: caught C++ exceptions after MPI initialization abort MPI_COMM_WORLD, including rank-local allocation failures. Direct library callers must supply identical controls, valid coherent partitions and compatible collective sequences and arrange communicator-wide failure handling. Mismatched direct solver controls, malformed direct operation inputs or an unhandled allocation exception can still strand peers. MPI error returns, process failure and out-of-memory kills are not recoverable by C++ catch handlers. No runtime safety claim is made without Vanda tests.
+Safety scope is the supplied runner, not a fully hardened library: caught C++ exceptions after MPI initialization abort MPI_COMM_WORLD, including rank-local allocation failures. Direct library callers must supply identical controls, valid coherent partitions and compatible collective sequences and arrange communicator-wide failure handling. Mismatched direct solver controls, malformed direct operation inputs or an unhandled allocation exception can still strand peers. MPI error returns, process failure and out-of-memory kills are not recoverable by C++ catch handlers. The successful Vanda tests cover the registered correctness and runner regressions, but do not certify every possible MPI failure path or resource-exhaustion scenario.
 
 Pre-distribution checks reject global row counts above INT_MAX, per-rank row-pointer counts or CSR payloads exceeding int, and unsupported metadata ABIs. The original ceil(N/P) partition formula and P>N rejection remain. Empty trailing ranks can occur even when P<=N and now participate in benchmark error reductions. Large-count MPI/chunked transfers are not supported. See SOURCE_PROVENANCE.md for exact source differences and validation status.

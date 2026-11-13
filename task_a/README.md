@@ -1,6 +1,6 @@
 # Task A: Serial, OpenMP and optional GPU Conjugate Gradient
 
-This directory is self-contained. It needs no MPI, hybrid code, sibling task, historical CSV or log. Production code is copied unchanged from 56ac360. Build and runtime execution are NOT VERIFIED in the migration environment; the commands below match the created targets and original CLI.
+This directory is self-contained. It needs no MPI, hybrid code, sibling task, historical CSV or log. Production code is copied unchanged from 56ac360. Independent verification on NUS Vanda on 13 November 2026 confirmed successful CPU and GPU builds, all seven CPU CTests, the GPU correctness test, representative benchmarks, and actual CUDA kernel launches on an NVIDIA A40. See [Vanda verification](../docs/VANDA_VERIFICATION_2026-11-13.md).
 
 ## CPU dependencies and build
 
@@ -53,7 +53,7 @@ No complete original OpenMP scheduling script was found. The report identifies 2
 
 ## Optional GPU
 
-Requires NVHPC nvc++, OpenMP GPU support and an NVIDIA GPU compatible with the preserved `-gpu=cc86` target (reported hardware: A40). Use a separate build directory. The recorded GPU environment used GCC/13.2.0 and NVHPC/24.7-CUDA-12.3.0; the recorded Release optimization was -O2.
+Requires NVHPC nvc++, OpenMP GPU support and an NVIDIA GPU compatible with the preserved `-gpu=cc86` target (reported hardware: A40). Use a separate build directory. On the verified Vanda A40 node, NVHPC 24.7 required `--gcc-toolchain=$(which gcc)` to resolve GCC startup-object paths. This workaround may be unnecessary on other installations. The recorded GPU environment used GCC/13.2.0 and NVHPC/24.7-CUDA-12.3.0; the recorded Release optimization was -O2.
 
 Compile from `task_a/` on the login node, using the separate GPU build directory:
 
@@ -62,6 +62,7 @@ module load GCC/13.2.0
 module load CMake/3.27.6-GCCcore-13.2.0
 module load NVHPC/24.7-CUDA-12.3.0
 cmake -S . -B build-gpu -DCMAKE_CXX_COMPILER=nvc++ \
+  -DCMAKE_CXX_FLAGS="--gcc-toolchain=$(which gcc)" \
   -DCMAKE_BUILD_TYPE=Release '-DCMAKE_CXX_FLAGS_RELEASE=-O2 -DNDEBUG' \
   -DCG_ENABLE_OPENMP_GPU=ON -DBUILD_TESTING=ON
 cmake --build build-gpu --target test_gpu_cg run_gpu_benchmark --verbose

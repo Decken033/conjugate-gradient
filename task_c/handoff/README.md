@@ -48,7 +48,7 @@ From this variant directory, inside a compute allocation with four MPI slots and
 ctest --test-dir build --output-on-failure --no-tests=error -j 1
 ```
 
-CTest runs original test_hybrid_ops at two ranks and test_hybrid_cg at two/four ranks. Each test has a 90-second timeout; Release test assertions are enabled. Numerical source and test contents are unchanged. Original runner/library failure paths are retained, not certified collectively safe; use identical valid arguments on every rank. Allocation failures, malformed input and unsupported sizes may expose historical limitations. No integrated safety reductions have been imported. BUILD AND RUNTIME NOT VERIFIED locally.
+CTest runs original test_hybrid_ops at two ranks and test_hybrid_cg at two/four ranks. Each test has a 90-second timeout; Release test assertions are enabled. Numerical source and test contents are unchanged. Original runner/library failure paths are retained, not certified collectively safe; use identical valid arguments on every rank. Allocation failures, malformed input and unsupported sizes may expose historical limitations. No integrated safety reductions have been imported. Independent verification on NUS Vanda on 13 November 2026 confirmed successful compilation, all three registered CTests passing, and representative Hybrid benchmark execution. A two-rank, four-thread-per-rank Poisson 2D64 run converged in 122 iterations with a true relative residual of approximately 8.71368e-09. See [Vanda verification](../../docs/VANDA_VERIFICATION_2026-11-13.md). These functional tests do not certify every MPI failure path or reproduce the original WSL2 timing results.
 
 ## Inputs and outputs
 
